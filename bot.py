@@ -1,7 +1,9 @@
+# encoding: utf-8
 
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import os
+from apis.camara import *
 from dotenv import load_dotenv
 
 load_dotenv()
