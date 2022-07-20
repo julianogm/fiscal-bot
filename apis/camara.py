@@ -3,6 +3,7 @@ import lxml.html
 import cssselect
 from datetime import date
 from constant import *
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 def get_request(url):
     response = requests.get(url)
@@ -68,3 +69,33 @@ def gastos(id):
     #valor gasto com verba de gabinete
     valores.append(arv.cssselect(csspath_verba_gab)[0].text_content())
     return valores
+
+def botoes_estados():
+    keyboard = []
+    i = 0
+    while i < 27:
+        keyboard.append(
+                        [InlineKeyboardButton(list(UF.values())[i], callback_data=list(UF.keys())[i]),
+                        InlineKeyboardButton(list(UF.values())[i+1], callback_data=list(UF.keys())[i+1]),
+                        InlineKeyboardButton(list(UF.values())[i+2], callback_data=list(UF.keys())[i+2]),]
+                        )
+        i+=3
+    #keyboard.append([InlineKeyboardButton(list(UF.values())[i], callback_data=list(UF.keys())[i])])
+    return InlineKeyboardMarkup(keyboard)
+
+def botoes_partidos():
+    siglas = list(set([dep['siglaPartido'] for dep in lista_deputados()]))
+    tam = len(siglas)
+    keyboard = []
+    i = 0
+    if tam%2==1:
+        keyboard.append([InlineKeyboardButton(siglas[i], callback_data=siglas[i])])
+        i+=1
+    
+    while i < tam:
+        keyboard.append(
+            [InlineKeyboardButton(siglas[i], callback_data=siglas[i]),
+             InlineKeyboardButton(siglas[i+1], callback_data=siglas[i+1]),]
+        )
+        i+=2
+    return InlineKeyboardMarkup(keyboard)
