@@ -81,6 +81,7 @@ def botoes_estados():
                         )
         i+=3
     #keyboard.append([InlineKeyboardButton(list(UF.values())[i], callback_data=list(UF.keys())[i])])
+    keyboard.append([InlineKeyboardButton("<< Voltar", callback_data="voltar")])
     return InlineKeyboardMarkup(keyboard)
 
 def botoes_partidos():
@@ -98,4 +99,13 @@ def botoes_partidos():
              InlineKeyboardButton(siglas[i+1], callback_data=siglas[i+1]),]
         )
         i+=2
+    keyboard.append([InlineKeyboardButton("<< Voltar", callback_data="voltar")])
+    return InlineKeyboardMarkup(keyboard)
+
+    
+def botoes_deputados():
+    keyboard = [
+        [InlineKeyboardButton("Por Partido ", callback_data='partido'),
+         InlineKeyboardButton("Por Estado", callback_data='estado'),],
+    ]
     return InlineKeyboardMarkup(keyboard)
