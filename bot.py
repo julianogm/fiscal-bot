@@ -2,7 +2,7 @@
 
 import os
 from apis.camara import *
-from tlgrm.commands import *
+import logging
 from dotenv import load_dotenv
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -27,20 +27,12 @@ def inicio(update, context):
 def ajuda(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text('Help!')    
-    
-def botoes_deputados():
-    keyboard = [
-        [InlineKeyboardButton("Por Partido", callback_data='partido'),
-         InlineKeyboardButton("Por Estado", callback_data='estado'),],
-    ]
-    return InlineKeyboardMarkup(keyboard)
 
 def deputados(update, context: CallbackContext):
 
     ld = por_partido("PT")
     ld_nomes = nomes_deputados(ld)
-    update.message.reply_text('Escolha um filtro:',
-                              reply_markup = buttons_deputados())
+    update.message.reply_text('Escolha um filtro:', reply_markup = botoes_deputados())
     
 def deputados_callback(update, context):
     query = update.callback_query
@@ -49,8 +41,13 @@ def deputados_callback(update, context):
     if query.data == "partido":
         query.edit_message_text(text = "Escolha um partido:", reply_markup = botoes_partidos())
     if query.data == "estado":
-        #query.message.edit("Escolha um estado:", reply_markup = botoes_estados() )
         query.edit_message_text(text = "Escolha um estado:", reply_markup = botoes_estados())
+    if query.data == "voltar":
+        query.edit_message_text('Escolha um filtro:', reply_markup = botoes_deputados())
+    if query.data in list(set(UF.keys())):
+        query.edit_message_text(nomes_deputados(por_estado(query.data)))
+    if query.data in list(set([dep['siglaPartido'] for dep in lista_deputados()])):
+        query.edit_message_text(nomes_deputados(por_partido(query.data)))
     
     print('query.data:', query.data)
     
