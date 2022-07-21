@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+from contextlib import nullcontext
 import os
 from apis.camara import *
 import logging
@@ -29,7 +30,6 @@ def ajuda(update, context):
     update.message.reply_text('Help!')    
 
 def deputados(update, context: CallbackContext):
-
     ld = por_partido("PT")
     ld_nomes = nomes_deputados(ld)
     update.message.reply_text('Escolha um filtro:', reply_markup = botoes_deputados())
@@ -54,7 +54,24 @@ def deputados_callback(update, context):
     
 def deputado(update, context):  
     #update.message.text
-    update.message.reply_text(update.message.text[10:])
+    nome_deputado = update.message.text[10:]
+    
+    if len(nome_deputado) < 3:
+        update.message.reply_text("Nome inválido ou muito curto")
+        return
+    
+    lista_deputados = por_nome(nome_deputado)
+    deputado = None      
+    
+    deputado = lista_deputados[0] if len(lista_deputados) == 1 else None
+    
+    if len(lista_deputados) == 0:
+        update.message.reply_text("Nome inválido")
+    elif deputado == None:
+        update.message.reply_text(nomes_deputados(lista_deputados))
+    else:
+        update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
+        update.message.reply_text(dados_deputado(deputado))
 
 def error(update, context):
     """Log Errors caused by Updates."""
