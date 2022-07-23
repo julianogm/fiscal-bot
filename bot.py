@@ -5,7 +5,7 @@ import os
 from apis.camara import *
 import logging
 from dotenv import load_dotenv
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 load_dotenv()
@@ -23,21 +23,24 @@ logger = logging.getLogger(__name__)
 # context. Error handlers also receive the raised TelegramError object in error.
 def inicio(update, context):
     """Send a message when the command /start is issued."""
-    update.message.reply_text('Hi!')
+    update.message.reply_text('Bot iniciado, digite /ajuda para para listar os comandos.')
 
 def ajuda(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')    
+    update.message.reply_text("Comandos disponíveis: \n"
+                        + "/ajuda - Listar comandos do bot \n"
+                        + "/deputados - Pesquisar deputados por filtros. \n"
+                        + "/deputado 'nome do deputado' - Pesquisar dados de um deputado pelo nome. \n"
+                        + "/estados - Listar deputados por Estado-UF. \n"
+                        + "/partidos - Listar deputados por partidos. \n"
+        )    
 
 def deputados(update, context: CallbackContext):
-    ld = por_partido("PT")
-    ld_nomes = nomes_deputados(ld)
     update.message.reply_text('Escolha um filtro:', reply_markup = botoes_deputados())
     
-def deputados_callback(update, context):
+def callback(update, context):
     query = update.callback_query
-    print('UPDATE #####:', update, ' #####\n')
-    print('QUERY #####:', query, '#####\n')
+    
     if query.data == "partido":
         query.edit_message_text(text = "Escolha um partido:", reply_markup = botoes_partidos())
     if query.data == "estado":
@@ -45,10 +48,11 @@ def deputados_callback(update, context):
     if query.data == "voltar":
         query.edit_message_text('Escolha um filtro:', reply_markup = botoes_deputados())
     if query.data in list(set(UF.keys())):
-        query.edit_message_text(nomes_deputados(por_estado(query.data)))
+        #query.edit_message_text(text = "Escolha uma opcao:", reply_markup = botoes_dep_sen())
+        query.edit_message_text(f"Deputados eleitos por {query.data}:\n" + nomes_deputados(por_estado(query.data)))
     if query.data in list(set([dep['siglaPartido'] for dep in lista_deputados()])):
         query.edit_message_text(nomes_deputados(por_partido(query.data)))
-    
+        
     print('query.data:', query.data)
     
     
@@ -72,10 +76,22 @@ def deputado(update, context):
     else:
         update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
         update.message.reply_text(dados_deputado(deputado))
+        
+def partidos(update, context):
+    update.message.reply_text(text = "Escolha um partido:", reply_markup = botoes_partidos())
+
+def estados(update, context):
+    update.message.reply_text(text = "Escolha um estado:", reply_markup = botoes_estados())
 
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+    
+def func(update, context):
+    id = update.message.text.replace('/dep_', '')
+    deputado = por_id(id)
+    update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
+    update.message.reply_text(dados_deputado(deputado))
 
 def main():
     """Start the bot."""
@@ -92,8 +108,11 @@ def main():
     dp.add_handler(CommandHandler("ajuda", ajuda))
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("deputado", deputado))
+    dp.add_handler(CommandHandler("partidos", partidos))
+    dp.add_handler(CommandHandler("estados", estados))
+    dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), func))
     dp.add_handler(CallbackQueryHandler(deputados, pattern='main'))
-    dp.add_handler(CallbackQueryHandler(deputados_callback))
+    dp.add_handler(CallbackQueryHandler(callback))
     
     # on noncommand i.e message - echo the message on Telegram
     #dp.add_handler(MessageHandler(Filters.text, echo))

@@ -5,37 +5,39 @@ from datetime import date
 from constant import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-def get_request(url):
-    response = requests.get(url)
+def get_camara(url):
+    response = requests.get(url, headers = {'Accept':'application/json'})
     return response.json()['dados']
 
 def lista_deputados():
-    lista = get_request(API_CAMARA + "deputados")
+    lista = get_camara(API_CAMARA + "deputados")
     #list(map(lambda x: x.update({'nome':x['nome'].lower()}), lista))
     return lista
 
-def por_estado(estado):
-    ld = lista_deputados()
-    lf = [dep for dep in ld if dep['siglaUf'] == estado]
+def por_estado(siglaUf):
+    lf = get_camara(API_CAMARA + f"deputados?siglaUf={siglaUf}&ordem=ASC&ordenarPor=nome")
     return lf
 
-def por_partido(partido):
-    ld = lista_deputados()
-    lf = [dep for dep in ld if dep['siglaPartido'] == partido]
+def por_partido(siglaPartido):
+    lf = get_camara(API_CAMARA + f"deputados?siglaPartido={siglaPartido}&ordem=ASC&ordenarPor=nome")
     return lf
 
 def por_nome(nome):
-    id_legis = get_request(LEGISLATURA)[0]['id']
+    id_legis = get_camara(LEGISLATURA)[0]['id']
     url = API_CAMARA + f"deputados?nome={nome}&idLegislatura={id_legis}&ordem=ASC&ordenarPor=nome"
-    lista = get_request(url)
+    lista = get_camara(url)
     return lista
 
+def por_id(id):
+    deputado = get_camara(API_CAMARA + f"deputados/{id}")
+    return deputado['ultimoStatus']
+
 def nomes_deputados(lista = lista_deputados()):
-    nomes = "\n".join([d['nome'] for d in lista])
+    nomes = "\n".join([ f"{d['nome']} - /dep_{d['id']}" for d in lista])
     return nomes
 
 def dados_deputado(deputado):
-    dados = get_request(API_CAMARA + f"deputados/{deputado['id']}")
+    dados = get_camara(API_CAMARA + f"deputados/{deputado['id']}")
     return montar_mensagem(deputado, dados)
     
 def montar_mensagem(deputado, dados):
@@ -73,22 +75,22 @@ def gastos(id):
 def botoes_estados():
     keyboard = []
     i = 0
-    while i < 27:
-        keyboard.append(
-                        [InlineKeyboardButton(list(UF.values())[i], callback_data=list(UF.keys())[i]),
-                        InlineKeyboardButton(list(UF.values())[i+1], callback_data=list(UF.keys())[i+1]),
-                        InlineKeyboardButton(list(UF.values())[i+2], callback_data=list(UF.keys())[i+2]),]
-                        )
-        i+=3
-    #keyboard.append([InlineKeyboardButton(list(UF.values())[i], callback_data=list(UF.keys())[i])])
-    keyboard.append([InlineKeyboardButton("<< Voltar", callback_data="voltar")])
+    while i < 26:
+        keyboard.append( [InlineKeyboardButton(UF_NOME[i], callback_data=UF_SIGLAS[i]),
+                         InlineKeyboardButton(UF_NOME[i+1], callback_data=UF_SIGLAS[i+1]),] )
+        i+=2
+    keyboard.append( [InlineKeyboardButton(UF_NOME[i], callback_data=UF_SIGLAS[i]),
+                     InlineKeyboardButton("<< Voltar", callback_data="voltar")] )
+    
     return InlineKeyboardMarkup(keyboard)
 
 def botoes_partidos():
     siglas = list(set([dep['siglaPartido'] for dep in lista_deputados()]))
+    siglas.sort()
     tam = len(siglas)
     keyboard = []
     i = 0
+
     if tam%2==1:
         keyboard.append([InlineKeyboardButton(siglas[i], callback_data=siglas[i])])
         i+=1
@@ -101,11 +103,17 @@ def botoes_partidos():
         i+=2
     keyboard.append([InlineKeyboardButton("<< Voltar", callback_data="voltar")])
     return InlineKeyboardMarkup(keyboard)
-
     
 def botoes_deputados():
     keyboard = [
         [InlineKeyboardButton("Por Partido ", callback_data='partido'),
          InlineKeyboardButton("Por Estado", callback_data='estado'),],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+def botoes_dep_sen(parlamento):
+    keyboard = [
+        [InlineKeyboardButton("Deputados ", callback_data='deputados'),
+         InlineKeyboardButton("Senadores", callback_data='senadores'),],
     ]
     return InlineKeyboardMarkup(keyboard)
