@@ -2,11 +2,12 @@
 
 from contextlib import nullcontext
 import os
-from apis.camara import *
+import camara
+import senado
 import logging
+from constant import *
 from dotenv import load_dotenv
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 load_dotenv()
 
@@ -31,67 +32,83 @@ def ajuda(update, context):
                         + "/ajuda - Listar comandos do bot \n"
                         + "/deputados - Pesquisar deputados por filtros. \n"
                         + "/deputado 'nome do deputado' - Pesquisar dados de um deputado pelo nome. \n"
-                        + "/estados - Listar deputados por Estado-UF. \n"
-                        + "/partidos - Listar deputados por partidos. \n"
+                        + "/estados - Listar deputados ou senadores por Estado-UF. \n"
+                        + "/partidos - Listar deputados ou senadores por partidos. \n"
         )    
 
 def deputados(update, context: CallbackContext):
-    update.message.reply_text('Escolha um filtro:', reply_markup = botoes_deputados())
+    update.message.reply_text('Escolha um filtro:', reply_markup = camara.botoes_deputados())
+
+def senadores(update, context: CallbackContext):
+    update.message.reply_text('Escolha um filtro:', reply_markup = senado.botoes_senadores())
     
 def callback(update, context):
     query = update.callback_query
-    
-    if query.data == "partido":
-        query.edit_message_text(text = "Escolha um partido:", reply_markup = botoes_partidos())
-    if query.data == "estado":
-        query.edit_message_text(text = "Escolha um estado:", reply_markup = botoes_estados())
-    if query.data == "voltar":
-        query.edit_message_text('Escolha um filtro:', reply_markup = botoes_deputados())
-    if query.data in list(set(UF.keys())):
-        #query.edit_message_text(text = "Escolha uma opcao:", reply_markup = botoes_dep_sen())
-        query.edit_message_text(f"Deputados eleitos por {query.data}:\n" + nomes_deputados(por_estado(query.data)))
-    if query.data in list(set([dep['siglaPartido'] for dep in lista_deputados()])):
-        query.edit_message_text(nomes_deputados(por_partido(query.data)))
-        
+    print("\n")
     print('query.data:', query.data)
-    
-    
+    print("\n")
+
+    chamada = query.data[:3]
+    condicao = query.data[4:]
+
+    if chamada == 'dep':
+        if condicao == "partido":
+            query.edit_message_text(text = "Escolha um partido:", reply_markup = camara.botoes_partidos_deputados())
+        if condicao == "estado":
+            query.edit_message_text(text = "Escolha um estado:", reply_markup = camara.botoes_estados_deputados())
+        if condicao == "voltar":
+            query.edit_message_text('Escolha um filtro:', reply_markup = camara.botoes_deputados())
+        if condicao in UF_SIGLAS:
+            query.edit_message_text(f"Deputados eleitos por {condicao}:\n" + camara.nomes_deputados(camara.deputado_por_estado(condicao)))
+        if condicao in camara.lista_partidos_deputados():
+            query.edit_message_text(camara.nomes_deputados(camara.deputado_por_partido(condicao)))
+    if chamada == 'sen':
+        if condicao == 'partido':
+            query.edit_message_text(text = "Escolha um partido:", reply_markup = senado.botoes_partidos_senadores())
+        if condicao == 'estado':
+            query.edit_message_text(text = "Escolha um estado:", reply_markup = senado.botoes_estados_senadores())
+        if condicao == 'voltar':
+            query.edit_message_text('Escolha um filtro:', reply_markup = senado.botoes_senadores())
+        if condicao in UF_SIGLAS:
+            query.edit_message_text(f"Senadores eleitos por {condicao}:\n" + senado.nomes_senadores(senado.senador_por_estado(condicao)))
+        if condicao in senado.lista_partidos_senadores():
+            query.edit_message_text(f"Senadores eleitos pelo partido {condicao}:\n" + senado.nomes_senadores(senado.senador_por_partido(condicao)))
+
 def deputado(update, context):  
-    #update.message.text
     nome_deputado = update.message.text[10:]
     
     if len(nome_deputado) < 3:
-        update.message.reply_text("Nome inválido ou muito curto")
+        update.message.reply_text("Nome muito curto")
         return
     
-    lista_deputados = por_nome(nome_deputado)
+    lista_deputados = camara.deputado_por_nome(nome_deputado)
     deputado = None      
     
     deputado = lista_deputados[0] if len(lista_deputados) == 1 else None
     
     if len(lista_deputados) == 0:
-        update.message.reply_text("Nome inválido")
+        update.message.reply_text("Nome não encontrado")
     elif deputado == None:
-        update.message.reply_text(nomes_deputados(lista_deputados))
+        update.message.reply_text(camara.nomes_deputados(lista_deputados))
     else:
         update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
-        update.message.reply_text(dados_deputado(deputado))
-        
-def partidos(update, context):
-    update.message.reply_text(text = "Escolha um partido:", reply_markup = botoes_partidos())
-
-def estados(update, context):
-    update.message.reply_text(text = "Escolha um estado:", reply_markup = botoes_estados())
+        update.message.reply_text(camara.dados_deputado(deputado))
 
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
     
-def func(update, context):
+def dep_nome_link(update, context):
     id = update.message.text.replace('/dep_', '')
-    deputado = por_id(id)
+    deputado = camara.deputado_por_id(id)
     update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
-    update.message.reply_text(dados_deputado(deputado))
+    update.message.reply_text(camara.dados_deputado(deputado))
+
+def sen_nome_link(update, context):
+    id = update.message.text.replace('/sen_', '')
+    senador = senado.senador_por_id(id)
+    update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+    update.message.reply_text(senado.dados_senador(senador))
 
 def main():
     """Start the bot."""
@@ -108,9 +125,10 @@ def main():
     dp.add_handler(CommandHandler("ajuda", ajuda))
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("deputado", deputado))
-    dp.add_handler(CommandHandler("partidos", partidos))
-    dp.add_handler(CommandHandler("estados", estados))
-    dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), func))
+    dp.add_handler(CommandHandler("senadores", senadores))
+    #dp.add_handler(CommandHandler("senador", senador))
+    dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
+    dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(deputados, pattern='main'))
     dp.add_handler(CallbackQueryHandler(callback))
     
