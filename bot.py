@@ -44,9 +44,6 @@ def senadores(update, context: CallbackContext):
     
 def callback(update, context):
     query = update.callback_query
-    print("\n")
-    print('query.data:', query.data)
-    print("\n")
 
     chamada = query.data[:3]
     condicao = query.data[4:]
