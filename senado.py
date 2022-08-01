@@ -3,6 +3,7 @@ from camara import montar_mensagem
 import lxml.html
 import cssselect
 from datetime import date
+from datetime import date
 from constant import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -47,13 +48,39 @@ def lista_partidos_senadores():
     lista_partidos = [item['IdentificacaoParlamentar']['SiglaPartidoParlamentar'] for item in ls]
     return lista_partidos
 
-def montar_mensagem(senador, dados):
-    mensagem = ""
-    info_senador = senador['IdentificacaoParlamentar']
+def gastos_senador(id):
+    ano_atual = date.today().year
+    resposta = requests.get(f"https://www6g.senado.leg.br/transparencia/sen/{id}/?ano={ano_atual}")
+    arv = lxml.html.fromstring(resposta.text)
+    
+    csspath_ceap = "#collapse-ceaps > div:nth-child(1) > table:nth-child(1) > tfoot:nth-child(4) > tr:nth-child(1) > td:nth-child(2)"
+    valor_ceap = arv.cssselect(csspath_ceap)[0].text_content()
 
-    mensagem += f"Nome civil: {info_senador['NomeCompletoParlamentar']}\n"
-    mensagem += f"Partido: {info_senador['SiglaPartidoParlamentar']}\n"
-    mensagem += f"Estado: {info_senador['UfParlamentar']}\n"
+    return valor_ceap
+
+def montar_mensagem(senador, dados):
+    info_senador = senador['IdentificacaoParlamentar']
+    gasto_ceap = gastos_senador(info_senador['CodigoParlamentar'])
+
+    telefone = senador['Telefones']['Telefone']
+
+    if isinstance(telefone, dict):
+        telefone = telefone['NumeroTelefone']
+    elif isinstance(telefone, list):
+        telefone = telefone[0]['NumeroTelefone']
+
+    mensagem = ""
+    mensagem += f"Nome civil: {info_senador['NomeCompletoParlamentar']} \n"
+    mensagem += f"Partido: {info_senador['SiglaPartidoParlamentar']} \n"
+    mensagem += f"Estado: {info_senador['UfParlamentar']} \n"
+    mensagem += f"Email: {info_senador['EmailParlamentar']} \n"
+    mensagem += f"Telefone: (61) {telefone} \n\n"
+    mensagem += f"Gastos do senador(a) {info_senador['NomeParlamentar']} em {date.today().year} \n"
+    mensagem += f"Cota de Atividade Parlamentar dos Senadores (CEAPS): R$ {gasto_ceap} \n\n"
+
+    mensagem += f"Mais sobre o senador(a): {info_senador['UrlPaginaParlamentar']} \n\n"
+    mensagem += f"Portal da transparência do Senado Federal: https://www12.senado.leg.br/transparencia \n"
+    mensagem += f"Sobre o CEAPS http://tiny.cc/ceaps "
 
     return mensagem
 
