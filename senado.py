@@ -1,8 +1,6 @@
 import requests
-from camara import montar_mensagem
 import lxml.html
 import cssselect
-from datetime import date
 from datetime import date
 from constant import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -26,6 +24,12 @@ def nomes_senadores(lista = lista_senadores):
     nomes = "\n".join([ f"{sen['IdentificacaoParlamentar']['NomeParlamentar']} - /sen_{sen['IdentificacaoParlamentar']['CodigoParlamentar']}" for sen in lista])
     return nomes
 
+def senador_por_nome(nome):
+    lista = lista_senadores()
+    nome_normal = nome.lower().translate(NORMALIZAR)
+    lf = [sen for sen in lista if nome_normal in sen['IdentificacaoParlamentar']['NomeParlamentar'].lower().translate(NORMALIZAR)]
+    return lf
+
 def senador_por_estado(siglaUF):
     lf = get_senado(API_SENADO + f"senador/lista/atual?uf={siglaUF}")['ListaParlamentarEmExercicio']['Parlamentares']['Parlamentar']
     return lf
@@ -48,33 +52,39 @@ def lista_partidos_senadores():
     lista_partidos = [item['IdentificacaoParlamentar']['SiglaPartidoParlamentar'] for item in ls]
     return lista_partidos
 
-def gastos_senador(id):
+def scrap_senador(id):
     ano_atual = date.today().year
     resposta = requests.get(f"https://www6g.senado.leg.br/transparencia/sen/{id}/?ano={ano_atual}")
     arv = lxml.html.fromstring(resposta.text)
     
-    csspath_ceap = "#collapse-ceaps > div:nth-child(1) > table:nth-child(1) > tfoot:nth-child(4) > tr:nth-child(1) > td:nth-child(2)"
-    valor_ceap = arv.cssselect(csspath_ceap)[0].text_content()
+    css_sel_ceap = "#collapse-ceaps > div:nth-child(1) > table:nth-child(1) > tfoot:nth-child(4) > tr:nth-child(1) > td:nth-child(2)"
+    valor_ceap = arv.cssselect(css_sel_ceap)[0].text_content()
 
-    return valor_ceap
+    css_sel_telefone = ".dl-horizontal > dd:nth-child(10)"
+    telefone = arv.cssselect(css_sel_telefone)[0].text_content()
+
+    lista = [valor_ceap, telefone]
+    return lista
 
 def montar_mensagem(senador, dados):
     info_senador = senador['IdentificacaoParlamentar']
-    gasto_ceap = gastos_senador(info_senador['CodigoParlamentar'])
+    gastos_telefone = scrap_senador(info_senador['CodigoParlamentar'])
 
-    telefone = senador['Telefones']['Telefone']
+    gasto_ceap = gastos_telefone[0]
+    telefone = gastos_telefone[1][:14]
 
-    if isinstance(telefone, dict):
-        telefone = telefone['NumeroTelefone']
-    elif isinstance(telefone, list):
-        telefone = telefone[0]['NumeroTelefone']
+    #if isinstance(telefone, dict):
+    #    telefone = telefone['NumeroTelefone']
+    #elif isinstance(telefone, list):
+    #    telefone = telefone[0]['NumeroTelefone']
+    email = info_senador.get('EmailParlamentar') if info_senador.get('EmailParlamentar') != None else "Sem email cadastrado"
 
     mensagem = ""
     mensagem += f"Nome civil: {info_senador['NomeCompletoParlamentar']} \n"
     mensagem += f"Partido: {info_senador['SiglaPartidoParlamentar']} \n"
     mensagem += f"Estado: {info_senador['UfParlamentar']} \n"
-    mensagem += f"Email: {info_senador['EmailParlamentar']} \n"
-    mensagem += f"Telefone: (61) {telefone} \n\n"
+    mensagem += f"Email: {email} \n"
+    mensagem += f"Telefone: {telefone} \n\n"
     mensagem += f"Gastos do senador(a) {info_senador['NomeParlamentar']} em {date.today().year} \n"
     mensagem += f"Cota de Atividade Parlamentar dos Senadores (CEAPS): R$ {gasto_ceap} \n\n"
 
@@ -96,6 +106,7 @@ def botoes_partidos_senadores():
 
     if tam%2==1:
         ultima_sigla = siglas.pop()
+        tam-=1
 
     while i < tam:
         keyboard.append(
