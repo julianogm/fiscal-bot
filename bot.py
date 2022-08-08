@@ -91,6 +91,27 @@ def deputado(update, context):
         update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
         update.message.reply_text(camara.dados_deputado(deputado))
 
+def senador(update, context):  
+    nome_senador = update.message.text[9:]
+    
+    if len(nome_senador) < 3:
+        update.message.reply_text("Nome muito curto")
+        return
+    
+    lista_senadores = senado.senador_por_nome(nome_senador)
+    senador = None
+    
+    senador = lista_senadores[0] if len(lista_senadores) == 1 else None
+    
+    if len(lista_senadores) == 0:
+        update.message.reply_text("Nome não encontrado")
+    elif senador == None:
+        update.message.reply_text(senado.nomes_senadores(lista_senadores))
+    else:
+        #update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+        update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+        update.message.reply_text(senado.dados_senador(senador))
+
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -104,7 +125,8 @@ def dep_nome_link(update, context):
 def sen_nome_link(update, context):
     id = update.message.text.replace('/sen_', '')
     senador = senado.senador_por_id(id)
-    update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+    update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+    #update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     update.message.reply_text(senado.dados_senador(senador))
 
 def main():
@@ -123,7 +145,7 @@ def main():
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("deputado", deputado))
     dp.add_handler(CommandHandler("senadores", senadores))
-    #dp.add_handler(CommandHandler("senador", senador))
+    dp.add_handler(CommandHandler("senador", senador))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(deputados, pattern='main'))
