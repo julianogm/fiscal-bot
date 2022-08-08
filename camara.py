@@ -99,6 +99,7 @@ def botoes_partidos_deputados():
 
     if tam%2==1:
         ultima_sigla = siglas.pop()
+        tam-=1
     
     while i < tam:
         keyboard.append(
@@ -106,6 +107,7 @@ def botoes_partidos_deputados():
              InlineKeyboardButton(siglas[i+1], callback_data='dep_'+siglas[i+1]),]
         )
         i+=2
+    
     if ultima_sigla != None:
         keyboard.append([InlineKeyboardButton(ultima_sigla, callback_data=ultima_sigla),
                         InlineKeyboardButton('<< Voltar', callback_data='dep_voltar')],)
