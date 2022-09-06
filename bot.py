@@ -28,20 +28,20 @@ def inicio(update, context):
 
 def ajuda(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text("Comandos disponíveis: \n"
-                        + "/ajuda - Listar comandos do bot \n"
-                        + "/deputados - Pesquisar deputados por filtros. \n"
-                        + "/deputado 'nome do deputado' - Pesquisar dados de um deputado pelo nome. \n"
-                        + "/estados - Listar deputados ou senadores por Estado-UF. \n"
-                        + "/partidos - Listar deputados ou senadores por partidos. \n"
-        )    
+    update.message.reply_text(
+                        "Comandos disponíveis: \n"
+                        + "/deputados - Listar deputados a partir de filtros. \n"
+                        + "/senadores - Listar senadores a partir de filtros. \n"
+                        + "/deputado - Pesquisar dados de um deputado pelo nome. \n"
+                        + "/senador - Pesquisar dados de um senador pelo nome."
+        )
 
 def deputados(update, context: CallbackContext):
     update.message.reply_text('Escolha um filtro:', reply_markup = camara.botoes_deputados())
 
 def senadores(update, context: CallbackContext):
     update.message.reply_text('Escolha um filtro:', reply_markup = senado.botoes_senadores())
-    
+
 def callback(update, context):
     query = update.callback_query
 
@@ -71,18 +71,18 @@ def callback(update, context):
         if condicao in senado.lista_partidos_senadores():
             query.edit_message_text(f"Senadores eleitos pelo partido {condicao}:\n" + senado.nomes_senadores(senado.senador_por_partido(condicao)))
 
-def deputado(update, context):  
+def deputado(update, context):
     nome_deputado = update.message.text[10:]
-    
+
     if len(nome_deputado) < 3:
         update.message.reply_text("Nome muito curto")
         return
-    
+
     lista_deputados = camara.deputado_por_nome(nome_deputado)
-    deputado = None      
-    
+    deputado = None
+
     deputado = lista_deputados[0] if len(lista_deputados) == 1 else None
-    
+
     if len(lista_deputados) == 0:
         update.message.reply_text("Nome não encontrado")
     elif deputado == None:
@@ -91,18 +91,18 @@ def deputado(update, context):
         update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
         update.message.reply_text(camara.dados_deputado(deputado))
 
-def senador(update, context):  
+def senador(update, context):
     nome_senador = update.message.text[9:]
-    
+
     if len(nome_senador) < 3:
         update.message.reply_text("Nome muito curto")
         return
-    
+
     lista_senadores = senado.senador_por_nome(nome_senador)
     senador = None
-    
+
     senador = lista_senadores[0] if len(lista_senadores) == 1 else None
-    
+
     if len(lista_senadores) == 0:
         update.message.reply_text("Nome não encontrado")
     elif senador == None:
@@ -115,7 +115,7 @@ def senador(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
-    
+
 def dep_nome_link(update, context):
     id = update.message.text.replace('/dep_', '')
     deputado = camara.deputado_por_id(id)
@@ -150,7 +150,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(deputados, pattern='main'))
     dp.add_handler(CallbackQueryHandler(callback))
-    
+
     # on noncommand i.e message - echo the message on Telegram
     #dp.add_handler(MessageHandler(Filters.text, echo))
 
@@ -158,11 +158,11 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                            port=int(PORT),
-                            url_path=TOKEN,
-                            webhook_url = 'https://fiscal-bot.herokuapp.com/' + TOKEN)
+    updater.start_polling()
+    #updater.start_webhook(listen="0.0.0.0",
+    #                        port=int(PORT),
+    #                        url_path=TOKEN,
+    #                        webhook_url = 'https://fiscal-bot.herokuapp.com/' + TOKEN)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
