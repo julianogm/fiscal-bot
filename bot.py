@@ -20,8 +20,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-# Define a few command handlers. These usually take the two arguments update and
-# context. Error handlers also receive the raised TelegramError object in error.
 def inicio(update, context):
     """Send a message when the command /start is issued."""
     update.message.reply_text('Bot iniciado, digite /ajuda para para listar os comandos.')
@@ -30,10 +28,12 @@ def ajuda(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text(
                         "Comandos disponíveis: \n"
-                        + "/deputados - Listar deputados a partir de filtros. \n"
-                        + "/senadores - Listar senadores a partir de filtros. \n"
-                        + "/deputado - Pesquisar dados de um deputado pelo nome. \n"
-                        + "/senador - Pesquisar dados de um senador pelo nome."
+                        + "/deputados - Listar deputados. \n"
+                        + "/senadores - Listar senadores. \n"
+                        + "/deputado - Pesquisar dados pelo nome parlamentar do deputado.\n"
+                        + "Exemplo: /deputado garrincha \n"
+                        + "/senador - Pesquisar dados pelo nome parlamentar do senador.\n"
+                        + "Exemplo: /senador tom jobim"
         )
 
 def deputados(update, context: CallbackContext):
@@ -59,7 +59,7 @@ def callback(update, context):
             query.edit_message_text(f"Deputados eleitos por {condicao}:\n" + camara.nomes_deputados(camara.deputado_por_estado(condicao)))
         if condicao in camara.lista_partidos_deputados():
             query.edit_message_text(camara.nomes_deputados(camara.deputado_por_partido(condicao)))
-    if chamada == 'sen':
+    elif chamada == 'sen':
         if condicao == 'partido':
             query.edit_message_text(text = "Escolha um partido:", reply_markup = senado.botoes_partidos_senadores())
         if condicao == 'estado':
@@ -88,7 +88,8 @@ def deputado(update, context):
     elif deputado == None:
         update.message.reply_text(camara.nomes_deputados(lista_deputados))
     else:
-        update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
+        #update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
+        update.message.reply_text(deputado['urlFoto'])
         update.message.reply_text(camara.dados_deputado(deputado))
 
 def senador(update, context):
@@ -108,7 +109,6 @@ def senador(update, context):
     elif senador == None:
         update.message.reply_text(senado.nomes_senadores(lista_senadores))
     else:
-        #update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
         update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
         update.message.reply_text(senado.dados_senador(senador))
 
@@ -119,21 +119,19 @@ def error(update, context):
 def dep_nome_link(update, context):
     id = update.message.text.replace('/dep_', '')
     deputado = camara.deputado_por_id(id)
-    update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
+    #update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
+    update.message.reply_text(deputado['urlFoto'])
     update.message.reply_text(camara.dados_deputado(deputado))
 
 def sen_nome_link(update, context):
     id = update.message.text.replace('/sen_', '')
     senador = senado.senador_por_id(id)
-    update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     #update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+    update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     update.message.reply_text(senado.dados_senador(senador))
 
 def main():
     """Start the bot."""
-    # Create the Updater and pass it your bot's token.
-    # Make sure to set use_context=True to use the new context based callbacks
-    # Post version 12 this will no longer be necessary
     updater = Updater(TOKEN, use_context=True)
 
     # Get the dispatcher to register handlers

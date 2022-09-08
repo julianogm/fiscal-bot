@@ -44,23 +44,26 @@ def nomes_deputados(lista = lista_deputados()):
 def dados_deputado(deputado):
     dados = get_camara(API_CAMARA + f"deputados/{deputado['id']}")
     return montar_mensagem(deputado, dados)
-    
+
 def gastos_deputado(id):
     resposta = requests.get(f"https://www.camara.leg.br/deputados/{id}")
     arv = lxml.html.fromstring(resposta.text)
     csspath_ceap = "#percentualgastocotaparlamentar > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)"
     csspath_verba_gab = "#percentualgastoverbagabinete > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)"
-    
+
     #valor gasto com cota parlamentar
     valores = [arv.cssselect(csspath_ceap)[0].text_content()]
-    
+
     #valor gasto com verba de gabinete
     valores.append(arv.cssselect(csspath_verba_gab)[0].text_content())
     return valores
 
 def montar_mensagem(deputado, dados):
     gastos = gastos_deputado(deputado["id"])
-    
+
+    if (deputado['email'] == None):
+        deputado['email'] = "Não encontrado"
+
     mensagem = ""
     mensagem += f"Nome civil: {dados['nomeCivil']} \n"
     mensagem += f"CPF: {dados['cpf']} \n"
@@ -74,7 +77,7 @@ def montar_mensagem(deputado, dados):
     mensagem += f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputado['id']} \n"
     mensagem += f"Detalhes dos gastos da camara: http://tiny.cc/gastos_parlamentares \n\n"
     mensagem += f"Sobre o CEAP: http://tiny.cc/ceap "
-    
+
     return mensagem
 
 def botoes_estados_deputados():
@@ -86,7 +89,7 @@ def botoes_estados_deputados():
         i+=2
     keyboard.append( [InlineKeyboardButton(UF_NOME[i], callback_data='dep_'+UF_SIGLAS[i]),
                      InlineKeyboardButton("<< Voltar", callback_data="dep_voltar")] )
-    
+
     return InlineKeyboardMarkup(keyboard)
 
 def botoes_partidos_deputados():
@@ -100,14 +103,14 @@ def botoes_partidos_deputados():
     if tam%2==1:
         ultima_sigla = siglas.pop()
         tam-=1
-    
+
     while i < tam:
         keyboard.append(
             [InlineKeyboardButton(siglas[i], callback_data='dep_'+siglas[i]),
              InlineKeyboardButton(siglas[i+1], callback_data='dep_'+siglas[i+1]),]
         )
         i+=2
-    
+
     if ultima_sigla != None:
         keyboard.append([InlineKeyboardButton(ultima_sigla, callback_data=ultima_sigla),
                         InlineKeyboardButton('<< Voltar', callback_data='dep_voltar')],)
@@ -115,7 +118,7 @@ def botoes_partidos_deputados():
         keyboard.append([InlineKeyboardButton('<< Voltar', callback_data='dep_voltar')])
 
     return InlineKeyboardMarkup(keyboard)
-    
+
 def botoes_deputados():
     keyboard = [
         [InlineKeyboardButton("Por Partido ", callback_data='dep_partido'),
