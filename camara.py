@@ -5,13 +5,16 @@ from datetime import date
 from constant import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+
 def get_camara(url):
     response = requests.get(url)
-    return response.json()['dados']
+    if response.status_code == 200:
+        return response.json()['dados']
+    else:
+        return response.json()['title']
 
 def lista_deputados():
     lista = get_camara(API_CAMARA + "deputados")
-    #list(map(lambda x: x.update({'nome':x['nome'].lower()}), lista))
     return lista
 
 def deputado_por_estado(siglaUf):
@@ -35,7 +38,9 @@ def lista_partidos_deputados():
 
 def deputado_por_id(id):
     deputado = get_camara(API_CAMARA + f"deputados/{id}")
-    return deputado['ultimoStatus']
+    if isinstance(deputado, dict):
+        return deputado['ultimoStatus']
+    return DEP_INVALIDO
 
 def nomes_deputados(lista = lista_deputados()):
     nomes = "\n".join([ f"{d['nome']} - /dep_{d['id']}" for d in lista ])

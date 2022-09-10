@@ -34,3 +34,15 @@ NORMALMAP = {'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
              '§': 'S',  '³': '3', '²': '2', '¹': '1'}
 
 NORMALIZAR = str.maketrans(NORMALMAP)
+
+DEP_INVALIDO = {
+            "id": None,
+            "uri": "Não encontrado",
+            "nome": "Não encontrado",
+            "siglaPartido": "Não encontrado",
+            "uriPartido": None,
+            "siglaUf": "Não encontrado",
+            "idLegislatura": None,
+            "urlFoto": "Não encontrado",
+            "email": None
+      }
