@@ -21,21 +21,16 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-def inicio(update, context):
-    """Send a message when the command /start is issued."""
-    update.message.reply_text('Bot iniciado, digite /ajuda para para listar os comandos.')
-
 def ajuda(update, context):
-    """Send a message when the command /help is issued."""
-    update.message.reply_text(
-                        "Comandos disponíveis: \n"
-                        + "/deputados - Listar deputados. \n"
-                        + "/senadores - Listar senadores. \n"
-                        + "/deputado - Pesquisar dados pelo nome parlamentar do deputado.\n"
-                        + "Exemplo: /deputado garrincha \n"
-                        + "/senador - Pesquisar dados pelo nome parlamentar do senador.\n"
-                        + "Exemplo: /senador tom jobim"
-        )
+    msg = ("Comandos disponíveis: \n"
+        + "/deputados - Listar deputados. \n"
+        + "/senadores - Listar senadores. \n"
+        + "/deputado - Pesquisar dados pelo nome parlamentar do deputado.\n"
+        + "Exemplo: /deputado tiririca \n"
+        + "/senador - Pesquisar dados pelo nome parlamentar do senador.\n"
+        + "Exemplo: /senador romario")
+
+    update.message.reply_text(msg)
 
 def deputados(update, context: CallbackContext):
     update.message.reply_text('Escolha um filtro:', reply_markup = camara.botoes_deputados())
@@ -75,6 +70,10 @@ def callback(update, context):
 def deputado(update, context):
     nome_deputado = update.message.text[10:]
 
+    if not nome_deputado:
+        update.message.reply_text("Insira um nome para pesquisa")
+        return
+
     if len(nome_deputado) < 3:
         update.message.reply_text("Nome muito curto")
         return
@@ -89,12 +88,15 @@ def deputado(update, context):
     elif deputado == None:
         update.message.reply_text(camara.nomes_deputados(lista_deputados))
     else:
-        #update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
         update.message.reply_text(deputado['urlFoto'])
         update.message.reply_text(camara.dados_deputado(deputado))
 
 def senador(update, context):
     nome_senador = update.message.text[9:]
+
+    if not nome_senador:
+        update.message.reply_text("Insira um nome para pesquisa")
+        return
 
     if len(nome_senador) < 3:
         update.message.reply_text("Nome muito curto")
@@ -120,14 +122,12 @@ def error(update, context):
 def dep_nome_link(update, context):
     id = update.message.text.replace('/dep_', '')
     deputado = camara.deputado_por_id(id)
-    #update.message.bot.send_photo(update.message.chat.id, deputado['urlFoto'])
     update.message.reply_text(deputado['urlFoto'])
     update.message.reply_text(camara.dados_deputado(deputado))
 
 def sen_nome_link(update, context):
     id = update.message.text.replace('/sen_', '')
     senador = senado.senador_por_id(id)
-    #update.message.bot.send_photo(update.message.chat.id, senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     update.message.reply_text(senado.dados_senador(senador))
 
@@ -139,7 +139,6 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("iniciar", inicio))
     dp.add_handler(CommandHandler("ajuda", ajuda))
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("deputado", deputado))
@@ -149,9 +148,8 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(deputados, pattern='main'))
     dp.add_handler(CallbackQueryHandler(callback))
-
-    # on noncommand i.e message - echo the message on Telegram
-    #dp.add_handler(MessageHandler(Filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.text, ajuda))
+    dp.add_handler(MessageHandler(Filters.command, ajuda))
 
     # log all errors
     dp.add_error_handler(error)

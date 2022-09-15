@@ -56,7 +56,7 @@ def scrap_senador(id):
     ano_atual = date.today().year
     resposta = requests.get(f"https://www6g.senado.leg.br/transparencia/sen/{id}/?ano={ano_atual}")
     arv = lxml.html.fromstring(resposta.text)
-    
+
     css_sel_ceap = "#collapse-ceaps > div:nth-child(1) > table:nth-child(1) > tfoot:nth-child(4) > tr:nth-child(1) > td:nth-child(2)"
     valor_ceap = arv.cssselect(css_sel_ceap)[0].text_content()
 
@@ -85,8 +85,8 @@ def montar_mensagem(senador, dados):
     mensagem += f"Estado: {info_senador['UfParlamentar']} \n"
     mensagem += f"Email: {email} \n"
     mensagem += f"Telefone: {telefone} \n\n"
-    mensagem += f"Gastos do senador(a) {info_senador['NomeParlamentar']} em {date.today().year} \n"
-    mensagem += f"Cota de Atividade Parlamentar dos Senadores (CEAPS): R$ {gasto_ceap} \n\n"
+    mensagem += f"Gastos de {info_senador['NomeParlamentar']} em {date.today().year} \n"
+    mensagem += f"CEAPS: R$ {gasto_ceap} \n\n"
 
     mensagem += f"Mais sobre o senador(a): {info_senador['UrlPaginaParlamentar']} \n\n"
     mensagem += f"Portal da transparência do Senado Federal: https://www12.senado.leg.br/transparencia \n"
@@ -114,7 +114,7 @@ def botoes_partidos_senadores():
                 InlineKeyboardButton(siglas[i+1], callback_data='sen_'+siglas[i+1]),]
             )
         i+=2
-    
+
     if ultima_sigla != None:
         keyboard.append([InlineKeyboardButton(ultima_sigla, callback_data=ultima_sigla),
                         InlineKeyboardButton('<< Voltar', callback_data='sen_voltar')],)
@@ -132,5 +132,5 @@ def botoes_estados_senadores():
         i+=2
     keyboard.append( [InlineKeyboardButton(UF_NOME[i], callback_data='sen_'+UF_SIGLAS[i]),
                      InlineKeyboardButton('<< Voltar', callback_data='sen_voltar')] )
-    
+
     return InlineKeyboardMarkup(keyboard)
