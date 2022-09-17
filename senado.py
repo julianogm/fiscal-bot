@@ -52,7 +52,7 @@ def lista_partidos_senadores():
     lista_partidos = [item['IdentificacaoParlamentar']['SiglaPartidoParlamentar'] for item in ls]
     return lista_partidos
 
-def scrap_senador(id):
+def info_senador(id):
     ano_atual = date.today().year
     resposta = requests.get(f"https://www6g.senado.leg.br/transparencia/sen/{id}/?ano={ano_atual}")
     arv = lxml.html.fromstring(resposta.text)
@@ -67,29 +67,29 @@ def scrap_senador(id):
     return lista
 
 def montar_mensagem(senador, dados):
-    info_senador = senador['IdentificacaoParlamentar']
-    gastos_telefone = scrap_senador(info_senador['CodigoParlamentar'])
+    dados_senador = senador['IdentificacaoParlamentar']
+    info = info_senador(dados_senador['CodigoParlamentar'])
 
-    gasto_ceap = gastos_telefone[0]
-    telefone = gastos_telefone[1][:14]
+    gasto_ceap = info[0]
+    telefone = info[1][:14]
 
     #if isinstance(telefone, dict):
     #    telefone = telefone['NumeroTelefone']
     #elif isinstance(telefone, list):
     #    telefone = telefone[0]['NumeroTelefone']
-    email = info_senador.get('EmailParlamentar') if info_senador.get('EmailParlamentar') != None else "Sem email cadastrado"
+    email = dados_senador.get('EmailParlamentar') if dados_senador.get('EmailParlamentar') != None else "Sem email cadastrado"
 
     mensagem = ""
-    mensagem += f"Nome civil: {info_senador['NomeCompletoParlamentar']} \n"
-    mensagem += f"Partido: {info_senador['SiglaPartidoParlamentar']} \n"
-    mensagem += f"Estado: {info_senador['UfParlamentar']} \n"
+    mensagem += f"Nome civil: {dados_senador['NomeCompletoParlamentar']} \n"
+    mensagem += f"Partido: {dados_senador['SiglaPartidoParlamentar']} | "
+    mensagem += f"Estado: {dados_senador['UfParlamentar']} \n"
     mensagem += f"Email: {email} \n"
     mensagem += f"Telefone: {telefone} \n\n"
-    mensagem += f"Gastos de {info_senador['NomeParlamentar']} em {date.today().year} \n"
+    mensagem += f"Gastos de {dados_senador['NomeParlamentar']} em {date.today().year} \n"
     mensagem += f"CEAPS: R$ {gasto_ceap} \n\n"
 
-    mensagem += f"Mais sobre o senador(a): {info_senador['UrlPaginaParlamentar']} \n\n"
-    mensagem += f"Portal da transparência do Senado Federal: https://www12.senado.leg.br/transparencia \n"
+    mensagem += f"Mais sobre o senador(a): {dados_senador['UrlPaginaParlamentar']} \n"
+    mensagem += f"Portal da transparência do Senado Federal: https://www12.senado.leg.br/transparencia \n\n"
     mensagem += f"Sobre o CEAPS http://tiny.cc/ceaps "
 
     return mensagem
