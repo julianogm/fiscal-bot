@@ -83,16 +83,14 @@ def sen_nome_link(update, context):
     update.message.reply_text(senado.dados_senador(senador))
     update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
 
-def nomes(update, context):
+def pesquisa_nome(update, context):
     nome = update.message.text
 
     if len(nome) < 4:
         update.message.reply_text("Nome muito curto")
         return
 
-    lista = []
     lista_deputados = camara.deputado_por_nome(nome)
-
     lista_senadores = senado.senador_por_nome(nome)
 
     if len(lista_senadores) == 0 and len(lista_deputados) == 0:
@@ -107,8 +105,10 @@ def nomes(update, context):
         update.message.reply_text(senado.dados_senador(lista_senadores[0]))
         update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
     else:
-        update.message.reply_text("Senadores encontrados:\n" + senado.nomes_senadores(lista_senadores))
-        update.message.reply_text("Deputados encontrados:\n" + camara.nomes_deputados(lista_deputados))
+        if len(lista_senadores) > 0:
+            update.message.reply_text("Senadores encontrados:\n" + senado.nomes_senadores(lista_senadores))
+        if len(lista_deputados) > 0:
+            update.message.reply_text("Deputados encontrados:\n" + camara.nomes_deputados(lista_deputados))
 
 def main():
     """Start the bot."""
@@ -125,7 +125,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(callback))
     dp.add_handler(MessageHandler(Filters.command, ajuda))
-    dp.add_handler(MessageHandler(Filters.text, nomes))
+    dp.add_handler(MessageHandler(Filters.text, pesquisa_nome))
 
     # log all errors
     dp.add_error_handler(error)
