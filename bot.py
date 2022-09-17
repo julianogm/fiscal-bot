@@ -25,11 +25,7 @@ logger = logging.getLogger(__name__)
 def ajuda(update, context):
     msg = ("Comandos disponíveis: \n"
         + "/deputados - Listar deputados. \n"
-        + "/senadores - Listar senadores. \n"
-        + "/deputado - Pesquisar dados pelo nome parlamentar do deputado.\n"
-        + "Exemplo: /deputado tiririca \n"
-        + "/senador - Pesquisar dados pelo nome parlamentar do senador.\n"
-        + "Exemplo: /senador romario")
+        + "/senadores - Listar senadores.")
 
     update.message.reply_text(msg)
 
@@ -69,57 +65,6 @@ def callback(update, context):
         if condicao in senado.lista_partidos_senadores():
             query.edit_message_text(f"Senadores eleitos pelo partido {condicao}:\n" + senado.nomes_senadores(senado.senador_por_partido(condicao)))
 
-def deputado(update, context):
-    nome_deputado = update.message.text[10:]
-
-    if not nome_deputado:
-        update.message.reply_text("Insira um nome para pesquisa")
-        return
-
-    if len(nome_deputado) < 3:
-        update.message.reply_text("Nome muito curto")
-        return
-
-    lista_deputados = camara.deputado_por_nome(nome_deputado)
-    deputado = None
-
-    deputado = lista_deputados[0] if len(lista_deputados) == 1 else None
-
-    if len(lista_deputados) == 0:
-        update.message.reply_text("Nome não encontrado")
-    elif deputado == None:
-        update.message.reply_text(camara.nomes_deputados(lista_deputados))
-    else:
-        update.message.reply_text(deputado['urlFoto'])
-        update.message.reply_text(camara.dados_deputado(deputado))
-        update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
-
-
-def senador(update, context):
-    nome_senador = update.message.text[9:]
-
-    if not nome_senador:
-        update.message.reply_text("Insira um nome para pesquisa")
-        return
-
-    if len(nome_senador) < 3:
-        update.message.reply_text("Nome muito curto")
-        return
-
-    lista_senadores = senado.senador_por_nome(nome_senador)
-    senador = None
-
-    senador = lista_senadores[0] if len(lista_senadores) == 1 else None
-
-    if len(lista_senadores) == 0:
-        update.message.reply_text("Nome não encontrado")
-    elif senador == None:
-        update.message.reply_text(senado.nomes_senadores(lista_senadores))
-    else:
-        update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
-        update.message.reply_text(senado.dados_senador(senador))
-        update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -138,6 +83,33 @@ def sen_nome_link(update, context):
     update.message.reply_text(senado.dados_senador(senador))
     update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
 
+def nomes(update, context):
+    nome = update.message.text
+
+    if len(nome) < 4:
+        update.message.reply_text("Nome muito curto")
+        return
+
+    lista = []
+    lista_deputados = camara.deputado_por_nome(nome)
+
+    lista_senadores = senado.senador_por_nome(nome)
+
+    if len(lista_senadores) == 0 and len(lista_deputados) == 0:
+        update.message.reply_text("Nome não encontrado")
+        return
+    elif len(lista_deputados) == 1 and len(lista_senadores) == 0:
+        update.message.reply_text(lista_deputados[0]['urlFoto'])
+        update.message.reply_text(camara.dados_deputado(lista_deputados[0]))
+        update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
+    elif len(lista_senadores) == 1 and len(lista_deputados) == 0:
+        update.message.reply_text(lista_senadores[0]['IdentificacaoParlamentar']['UrlFotoParlamentar'])
+        update.message.reply_text(senado.dados_senador(lista_senadores[0]))
+        update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
+    else:
+        update.message.reply_text("Senadores encontrados:\n" + senado.nomes_senadores(lista_senadores))
+        update.message.reply_text("Deputados encontrados:\n" + camara.nomes_deputados(lista_deputados))
+
 def main():
     """Start the bot."""
     updater = Updater(TOKEN, use_context=True)
@@ -148,24 +120,22 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("ajuda", ajuda))
     dp.add_handler(CommandHandler("deputados", deputados))
-    dp.add_handler(CommandHandler("deputado", deputado))
     dp.add_handler(CommandHandler("senadores", senadores))
-    dp.add_handler(CommandHandler("senador", senador))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(callback))
-    dp.add_handler(MessageHandler(Filters.text, ajuda))
     dp.add_handler(MessageHandler(Filters.command, ajuda))
+    dp.add_handler(MessageHandler(Filters.text, nomes))
 
     # log all errors
     dp.add_error_handler(error)
 
     # Start the Bot
-    updater.start_polling()
-    #updater.start_webhook(listen="0.0.0.0",
-    #                        port=int(PORT),
-    #                        url_path=TOKEN,
-    #                        webhook_url = WEBHOOK_URL + TOKEN)
+    #updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                            port=int(PORT),
+                            url_path=TOKEN,
+                            webhook_url = WEBHOOK_URL + TOKEN)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
