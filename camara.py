@@ -120,7 +120,7 @@ def botoes_partidos_deputados():
         i+=2
 
     if ultima_sigla != None:
-        keyboard.append([InlineKeyboardButton(ultima_sigla, callback_data=ultima_sigla),
+        keyboard.append([InlineKeyboardButton(ultima_sigla, callback_data='dep_'+ultima_sigla),
                         InlineKeyboardButton('<< Voltar', callback_data='dep_voltar')],)
     else:
         keyboard.append([InlineKeyboardButton('<< Voltar', callback_data='dep_voltar')])

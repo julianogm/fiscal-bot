@@ -45,6 +45,7 @@ def callback(update, context):
     chamada = query.data[:3]
     condicao = query.data[4:]
 
+
     if chamada == 'dep':
         if condicao == "partido":
             query.edit_message_text(text = "Escolha um partido:", reply_markup = camara.botoes_partidos_deputados())
@@ -152,7 +153,6 @@ def main():
     dp.add_handler(CommandHandler("senador", senador))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
-    dp.add_handler(CallbackQueryHandler(deputados, pattern='main'))
     dp.add_handler(CallbackQueryHandler(callback))
     dp.add_handler(MessageHandler(Filters.text, ajuda))
     dp.add_handler(MessageHandler(Filters.command, ajuda))
@@ -161,11 +161,11 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                            port=int(PORT),
-                            url_path=TOKEN,
-                            webhook_url = WEBHOOK_URL + TOKEN)
+    updater.start_polling()
+    #updater.start_webhook(listen="0.0.0.0",
+    #                        port=int(PORT),
+    #                        url_path=TOKEN,
+    #                        webhook_url = WEBHOOK_URL + TOKEN)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
