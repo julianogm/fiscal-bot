@@ -8,6 +8,7 @@ import logging
 from constant import *
 from dotenv import load_dotenv
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
+from telegram import ParseMode
 
 load_dotenv()
 
@@ -90,6 +91,8 @@ def deputado(update, context):
     else:
         update.message.reply_text(deputado['urlFoto'])
         update.message.reply_text(camara.dados_deputado(deputado))
+        update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
+
 
 def senador(update, context):
     nome_senador = update.message.text[9:]
@@ -114,6 +117,7 @@ def senador(update, context):
     else:
         update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
         update.message.reply_text(senado.dados_senador(senador))
+        update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
 
 def error(update, context):
     """Log Errors caused by Updates."""
@@ -124,12 +128,14 @@ def dep_nome_link(update, context):
     deputado = camara.deputado_por_id(id)
     update.message.reply_text(deputado['urlFoto'])
     update.message.reply_text(camara.dados_deputado(deputado))
+    update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
 
 def sen_nome_link(update, context):
     id = update.message.text.replace('/sen_', '')
     senador = senado.senador_por_id(id)
     update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     update.message.reply_text(senado.dados_senador(senador))
+    update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
 
 def main():
     """Start the bot."""
