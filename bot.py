@@ -25,7 +25,11 @@ logger = logging.getLogger(__name__)
 def ajuda(update, context):
     msg = ("Comandos disponíveis: \n"
         + "/deputados - Listar deputados. \n"
-        + "/senadores - Listar senadores.")
+        + "/senadores - Listar senadores.\n\n"
+        + "Você pode clicar nos links ao lado dos nomes dos parlamentares "
+        + "listados para ver as informações daquele parlamentar.\n\n"
+        + "Para pesquisar por nome, envie uma mensagem com o nome "
+        + "ou uma parte do nome do deputado ou senador desejado.")
 
     update.message.reply_text(msg)
 
@@ -118,7 +122,6 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("ajuda", ajuda))
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("senadores", senadores))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
