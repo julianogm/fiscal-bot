@@ -50,21 +50,24 @@ def dados_deputado(deputado):
     dados = get_camara(API_CAMARA + f"deputados/{deputado['id']}")
     return montar_mensagem(deputado, dados)
 
-def gastos_deputado(id):
+def info_deputado(id):
     resposta = requests.get(f"https://www.camara.leg.br/deputados/{id}")
     arv = lxml.html.fromstring(resposta.text)
     csspath_ceap = "#percentualgastocotaparlamentar > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)"
     csspath_verba_gab = "#percentualgastoverbagabinete > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)"
+    csspath_email = ".email"
+
+    info = [arv.cssselect(csspath_email)[0].text_content()]
 
     #valor gasto com cota parlamentar
-    valores = [arv.cssselect(csspath_ceap)[0].text_content()]
+    info.append(arv.cssselect(csspath_ceap)[0].text_content())
 
     #valor gasto com verba de gabinete
-    valores.append(arv.cssselect(csspath_verba_gab)[0].text_content())
-    return valores
+    info.append(arv.cssselect(csspath_verba_gab)[0].text_content())
+    return info
 
 def montar_mensagem(deputado, dados):
-    gastos = gastos_deputado(deputado["id"])
+    info = info_deputado(deputado["id"])
 
     if (deputado['email'] == None):
         deputado['email'] = "Não encontrado"
@@ -72,13 +75,13 @@ def montar_mensagem(deputado, dados):
     mensagem = ""
     mensagem += f"Nome civil: {dados['nomeCivil']} \n"
     mensagem += f"CPF: {dados['cpf']} \n"
-    mensagem += f"Partido: {deputado['siglaPartido']} \n"
+    mensagem += f"Partido: {deputado['siglaPartido']} | "
     mensagem += f"Estado: {deputado['siglaUf']} \n"
-    mensagem += f"Email: {deputado['email']} \n"
+    mensagem += f"Email: {info[0]} \n"
     mensagem += f"Telefone: (61) {dados['ultimoStatus']['gabinete']['telefone']} \n\n"
     mensagem += f"Gastos de {deputado['nome']} em {date.today().year} \n"
-    mensagem += f"CEAP: R$ {gastos[0]} \n"
-    mensagem += f"Verba de Gabinete: R$ {gastos[1]} \n\n"
+    mensagem += f"CEAP: R$ {info[1]} \n"
+    mensagem += f"Verba de Gabinete: R$ {info[2]} \n\n"
     mensagem += f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputado['id']} \n"
     mensagem += f"Detalhes dos gastos da camara: http://tiny.cc/gastos_parlamentares \n\n"
     mensagem += f"Sobre o CEAP: http://tiny.cc/ceap "
