@@ -49,6 +49,10 @@ def parlamento(update, context):
 
     update.message.reply_text(msg, disable_web_page_preview=True)
 
+def sobre(update, context):
+    msg = ("Código fonte (ainda em desenvolvimento): \nhttps://github.com/julianogm/fiscal-bot \n\n")
+    update.message.reply_text(msg, disable_web_page_preview=True)
+
 def callback(update, context):
     query = update.callback_query
 
@@ -134,6 +138,7 @@ def main():
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("senadores", senadores))
     dp.add_handler(CommandHandler("parlamento", parlamento))
+    dp.add_handler(CommandHandler("sobre", sobre))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(callback))
@@ -144,11 +149,11 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                            port=int(PORT),
-                            url_path=TOKEN,
-                            webhook_url = WEBHOOK_URL + TOKEN)
+    updater.start_polling()
+    #updater.start_webhook(listen="0.0.0.0",
+    #                        port=int(PORT),
+    #                        url_path=TOKEN,
+    #                        webhook_url = WEBHOOK_URL + TOKEN)
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
