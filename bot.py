@@ -26,8 +26,10 @@ logger = logging.getLogger(__name__)
 
 def ajuda(update, context):
     msg = ("Comandos disponíveis: \n"
-        + "/deputados - Listar deputados. \n"
-        + "/senadores - Listar senadores.\n\n"
+        + "/deputados - Listar deputados.\n"
+        + "/senadores - Listar senadores.\n"
+        + "/parlamento - Informações sobre o parlamento brasileiro.\n"
+        + "/sobre - Informações sobre o bot.\n\n"
         + "Você pode clicar nos links ao lado dos nomes dos parlamentares "
         + "listados para ver as informações daquele parlamentar.\n\n"
         + "Para pesquisar por nome, envie uma mensagem com o nome "
@@ -175,9 +177,6 @@ def main():
     #                        url_path=TOKEN,
     #                        webhook_url = WEBHOOK_URL + TOKEN)
 
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
 if __name__ == '__main__':

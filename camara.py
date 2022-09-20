@@ -80,7 +80,7 @@ def montar_mensagem(deputado, dados):
     mensagem += f"Gastos de {deputado['nome']} em {date.today().year} \n"
     mensagem += f"CEAP: R$ {info[1]} \n"
     mensagem += f"Verba de Gabinete: R$ {info[2]} \n\n"
-    mensagem += "Verificar Processos:\n"
+    mensagem += "Verificar processos envolvendo o parlamentar:\n"
     mensagem += f"/p_{nome_lower} \n\n"
     mensagem += f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputado['id']} \n"
 
