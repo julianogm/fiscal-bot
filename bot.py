@@ -9,6 +9,8 @@ from constant import *
 from dotenv import load_dotenv
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
 from telegram import ParseMode
+from apis import politicos_org
+
 
 load_dotenv()
 
@@ -100,6 +102,23 @@ def sen_nome_link(update, context):
     update.message.reply_text(senado.dados_senador(senador))
     update.message.reply_text(text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>", parse_mode=ParseMode.HTML)
 
+def p(update, context):
+    nome = update.message.text.replace('/p_', '').lower()
+
+    processos = politicos_org.get_processos(nome)
+
+    if processos == False:
+        update.message.reply_text("Não foram encontrados processos envolvendo o parlamentar.")
+        return
+
+    for item in processos:
+        mensagem = ""
+        mensagem += f"Dados do processo: {item['number']}\n"
+        mensagem += f"Situação: {item['processStatus']}\n\n"
+        mensagem += f"Descrição: {item['processText']}\n"
+        mensagem += f"Mais informações: {item['processUrl']}"
+        update.message.reply_text(text=mensagem)
+
 def pesquisa_nome(update, context):
     nome = update.message.text
 
@@ -141,6 +160,7 @@ def main():
     dp.add_handler(CommandHandler("sobre", sobre))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
+    dp.add_handler(MessageHandler(Filters.regex(r'^(/p_[\D]+)$'), p))
     dp.add_handler(CallbackQueryHandler(callback))
     dp.add_handler(MessageHandler(Filters.command, ajuda))
     dp.add_handler(MessageHandler(Filters.text, pesquisa_nome))

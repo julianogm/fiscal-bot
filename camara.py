@@ -68,9 +68,7 @@ def info_deputado(id):
 
 def montar_mensagem(deputado, dados):
     info = info_deputado(deputado["id"])
-
-    if (deputado['email'] == None):
-        deputado['email'] = "Não encontrado"
+    nome_lower = dados['nomeCivil'].replace(' ','_').translate(NORMALIZAR).lower()
 
     mensagem = ""
     mensagem += f"Nome civil: {dados['nomeCivil']} \n"
@@ -82,9 +80,9 @@ def montar_mensagem(deputado, dados):
     mensagem += f"Gastos de {deputado['nome']} em {date.today().year} \n"
     mensagem += f"CEAP: R$ {info[1]} \n"
     mensagem += f"Verba de Gabinete: R$ {info[2]} \n\n"
+    mensagem += "Verificar Processos:\n"
+    mensagem += f"/p_{nome_lower} \n\n"
     mensagem += f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputado['id']} \n"
-    mensagem += f"Detalhes dos gastos da camara: http://tiny.cc/gastos_parlamentares \n\n"
-    mensagem += f"Sobre o CEAP: http://tiny.cc/ceap "
 
     return mensagem
 

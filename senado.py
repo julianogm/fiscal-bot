@@ -1,6 +1,7 @@
 import requests
 import lxml.html
 import cssselect
+from constant import *
 from datetime import date
 from constant import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -69,14 +70,11 @@ def info_senador(id):
 def montar_mensagem(senador, dados):
     dados_senador = senador['IdentificacaoParlamentar']
     info = info_senador(dados_senador['CodigoParlamentar'])
+    nome_lower = dados_senador['NomeCompletoParlamentar'].replace(' ','_').translate(NORMALIZAR).lower()
 
     gasto_ceap = info[0]
     telefone = info[1][:14]
 
-    #if isinstance(telefone, dict):
-    #    telefone = telefone['NumeroTelefone']
-    #elif isinstance(telefone, list):
-    #    telefone = telefone[0]['NumeroTelefone']
     email = dados_senador.get('EmailParlamentar') if dados_senador.get('EmailParlamentar') != None else "Sem email cadastrado"
 
     mensagem = ""
@@ -88,12 +86,12 @@ def montar_mensagem(senador, dados):
     mensagem += f"Gastos de {dados_senador['NomeParlamentar']} em {date.today().year} \n"
     mensagem += f"CEAPS: R$ {gasto_ceap} \n\n"
 
+    mensagem += "Verificar Processos:\n"
+    mensagem += f"/p_{nome_lower} \n\n"
+
     mensagem += f"Mais sobre o senador(a): {dados_senador['UrlPaginaParlamentar']} \n"
-    mensagem += f"Portal da transparência do Senado Federal: https://www12.senado.leg.br/transparencia \n\n"
-    mensagem += f"Sobre o CEAPS http://tiny.cc/ceaps "
 
     return mensagem
-
 
 def botoes_partidos_senadores():
     ls = lista_senadores()
