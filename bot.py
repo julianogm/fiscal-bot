@@ -39,12 +39,21 @@ def deputados(update, context: CallbackContext):
 def senadores(update, context: CallbackContext):
     update.message.reply_text('Escolha um filtro:', reply_markup = senado.botoes_senadores())
 
+def parlamento(update, context):
+    msg = ("O parlamento brasileiro é o Congresso Nacional, constituído pela Câmara dos Deputados e pelo Senado Federal.\n"
+        +  "O Congresso Nacional é o órgão constitucional que exerce, no âmbito federal, as funções do poder legislativo, quais sejam, elaborar/aprovar leis e fiscalizar o Estado brasileiro (suas duas funções típicas), bem como administrar e julgar (funções atípicas).\n\n"
+        +  "Gastos do Senado Federal e da Câmara do Deputados:\n"
+        +  "https://www12.senado.leg.br/transparencia \n"
+        +  "http://tiny.cc/gastos_parlamentares\n\n"
+        +  "Sobre a CEAP (Cota para o Exercício da Atividade Parlamentar): \nhttp://tiny.cc/ceap \nhttp://tiny.cc/ceaps")
+
+    update.message.reply_text(msg, disable_web_page_preview=True)
+
 def callback(update, context):
     query = update.callback_query
 
     chamada = query.data[:3]
     condicao = query.data[4:]
-
 
     if chamada == 'dep':
         if condicao == "partido":
@@ -124,6 +133,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("deputados", deputados))
     dp.add_handler(CommandHandler("senadores", senadores))
+    dp.add_handler(CommandHandler("parlamento", parlamento))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
     dp.add_handler(CallbackQueryHandler(callback))
