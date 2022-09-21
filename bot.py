@@ -92,6 +92,8 @@ def error(update, context):
 
 def dep_nome_link(update, context):
     id = update.message.text.replace('/dep_', '')
+    id = id.split('@', 1)[0]
+
     deputado = camara.deputado_por_id(id)
     update.message.reply_text(deputado['urlFoto'])
     update.message.reply_text(camara.dados_deputado(deputado))
@@ -99,6 +101,8 @@ def dep_nome_link(update, context):
 
 def sen_nome_link(update, context):
     id = update.message.text.replace('/sen_', '')
+    id = id.split('@', 1)[0]
+
     senador = senado.senador_por_id(id)
     update.message.reply_text(senador['IdentificacaoParlamentar']['UrlFotoParlamentar'])
     update.message.reply_text(senado.dados_senador(senador))
@@ -106,6 +110,7 @@ def sen_nome_link(update, context):
 
 def p(update, context):
     nome = update.message.text.replace('/p_', '').lower()
+    nome = nome.split('@', 1)[0]
 
     processos = politicos_org.get_processos(nome)
 
@@ -160,8 +165,8 @@ def main():
     dp.add_handler(CommandHandler("senadores", senadores))
     dp.add_handler(CommandHandler("parlamento", parlamento))
     dp.add_handler(CommandHandler("sobre", sobre))
-    dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d]+)$'), dep_nome_link))
-    dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d]+)$'), sen_nome_link))
+    dp.add_handler(MessageHandler(Filters.regex(r'^(/dep_[\d@'+updater.bot.username+']+)$'), dep_nome_link))
+    dp.add_handler(MessageHandler(Filters.regex(r'^(/sen_[\d@'+updater.bot.username+']+)$'), sen_nome_link))
     dp.add_handler(MessageHandler(Filters.regex(r'^(/p_[\D]+)$'), p))
     dp.add_handler(CallbackQueryHandler(callback))
     dp.add_handler(MessageHandler(Filters.command, ajuda))
@@ -171,11 +176,11 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    updater.start_polling()
-    #updater.start_webhook(listen="0.0.0.0",
-    #                        port=int(PORT),
-    #                        url_path=TOKEN,
-    #                        webhook_url = WEBHOOK_URL + TOKEN)
+    #updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                            port=int(PORT),
+                            url_path=TOKEN,
+                            webhook_url = WEBHOOK_URL + TOKEN)
 
     updater.idle()
 
