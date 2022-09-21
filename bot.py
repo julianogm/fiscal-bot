@@ -71,7 +71,7 @@ def callback(update, context):
         if condicao == "voltar":
             query.edit_message_text('Escolha um filtro:', reply_markup = camara.botoes_deputados())
         if condicao in UF_SIGLAS:
-            query.edit_message_text(f"Deputados eleitos por {condicao}:\n" + camara.nomes_deputados(camara.deputado_por_estado(condicao)))
+            query.edit_message_text(f"Deputados em exercício - {condicao}:\n" + camara.nomes_deputados(camara.deputado_por_estado(condicao)))
         if condicao in camara.lista_partidos_deputados():
             query.edit_message_text(camara.nomes_deputados(camara.deputado_por_partido(condicao)))
     elif chamada == 'sen':
@@ -82,7 +82,7 @@ def callback(update, context):
         if condicao == 'voltar':
             query.edit_message_text('Escolha um filtro:', reply_markup = senado.botoes_senadores())
         if condicao in UF_SIGLAS:
-            query.edit_message_text(f"Senadores eleitos por {condicao}:\n" + senado.nomes_senadores(senado.senador_por_estado(condicao)))
+            query.edit_message_text(f"Senadores em exercício - {condicao}:\n" + senado.nomes_senadores(senado.senador_por_estado(condicao)))
         if condicao in senado.lista_partidos_senadores():
             query.edit_message_text(f"Senadores eleitos pelo partido {condicao}:\n" + senado.nomes_senadores(senado.senador_por_partido(condicao)))
 
@@ -176,11 +176,11 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                            port=int(PORT),
-                            url_path=TOKEN,
-                            webhook_url = WEBHOOK_URL + TOKEN)
+    updater.start_polling()
+    #updater.start_webhook(listen="0.0.0.0",
+    #                        port=int(PORT),
+    #                        url_path=TOKEN,
+    #                        webhook_url = WEBHOOK_URL + TOKEN)
 
     updater.idle()
 
