@@ -71,6 +71,7 @@ def montar_mensagem(senador, dados):
     dados_senador = senador['IdentificacaoParlamentar']
     info = info_senador(dados_senador['CodigoParlamentar'])
     nome_lower = dados_senador['NomeCompletoParlamentar'].replace(' ','_').translate(NORMALIZAR).lower()
+    nome_par_lower = dados_senador['NomeCompletoParlamentar'].replace(' ','+').translate(NORMALIZAR).lower()
 
     gasto_ceap = info[0]
     telefone = info[1][:14]
@@ -86,10 +87,11 @@ def montar_mensagem(senador, dados):
     mensagem += f"Gastos de {dados_senador['NomeParlamentar']} em {date.today().year} \n"
     mensagem += f"CEAPS: R$ {gasto_ceap} \n\n"
 
-    mensagem += "Verificar processos envolvendo o parlamentar:\n"
-    mensagem += f"/p_{nome_lower} \n\n"
+    #mensagem += "Verificar processos envolvendo o parlamentar:\n"
+    #mensagem += f"/p_{nome_lower} \n\n"
 
     mensagem += f"Mais sobre o senador(a): {dados_senador['UrlPaginaParlamentar']} \n"
+    mensagem += f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={nome_par_lower}"
 
     return mensagem
 

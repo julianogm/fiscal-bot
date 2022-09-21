@@ -69,10 +69,11 @@ def info_deputado(id):
 def montar_mensagem(deputado, dados):
     info = info_deputado(deputado["id"])
     nome_lower = dados['nomeCivil'].replace(' ','_').translate(NORMALIZAR).lower()
+    nome_par_lower = dados['nomeCivil'].replace(' ','+').translate(NORMALIZAR).lower()
 
     mensagem = ""
     mensagem += f"Nome civil: {dados['nomeCivil']} \n"
-    mensagem += f"CPF: {dados['cpf']} \n"
+    #mensagem += f"CPF: {dados['cpf']} \n"
     mensagem += f"Partido: {deputado['siglaPartido']} | "
     mensagem += f"Estado: {deputado['siglaUf']} \n"
     mensagem += f"Email: {info[0]} \n"
@@ -80,9 +81,10 @@ def montar_mensagem(deputado, dados):
     mensagem += f"Gastos de {deputado['nome']} em {date.today().year} \n"
     mensagem += f"CEAP: R$ {info[1]} \n"
     mensagem += f"Verba de Gabinete: R$ {info[2]} \n\n"
-    mensagem += "Verificar processos envolvendo o parlamentar:\n"
-    mensagem += f"/p_{nome_lower} \n\n"
+    #mensagem += "Verificar processos envolvendo o parlamentar:\n"
+    #mensagem += f"/p_{nome_lower} \n\n"
     mensagem += f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputado['id']} \n"
+    mensagem += f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={nome_par_lower}"
 
     return mensagem
 
