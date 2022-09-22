@@ -11,12 +11,12 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 from telegram import ParseMode
 from apis import politicos_org
 
-
 load_dotenv()
 
 PORT = int(os.environ['PORT'])
 TOKEN = os.environ['TOKEN']
 WEBHOOK_URL = os.environ['WEBHOOK_URL']
+MODE = os.environ['MODE']
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -176,11 +176,16 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                            port=int(PORT),
-                            url_path=TOKEN,
-                            webhook_url = WEBHOOK_URL + TOKEN)
+    if MODE == 'webhook':
+        updater.start_webhook(listen="0.0.0.0",
+                                port=int(PORT),
+                                url_path=TOKEN,
+                                webhook_url = WEBHOOK_URL + TOKEN)
+    elif MODE == 'polling':
+        updater.start_polling()
+    else:
+        print("--- Invalid MODE value. Set MODE to 'polling' or 'webhook'. ---")
+        exit()
 
     updater.idle()
 
