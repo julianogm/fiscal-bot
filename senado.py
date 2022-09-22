@@ -59,7 +59,10 @@ def info_senador(id):
     arv = lxml.html.fromstring(resposta.text)
 
     css_sel_ceap = "#collapse-ceaps > div:nth-child(1) > table:nth-child(1) > tfoot:nth-child(4) > tr:nth-child(1) > td:nth-child(2)"
-    valor_ceap = arv.cssselect(css_sel_ceap)[0].text_content()
+    if arv.cssselect(css_sel_ceap):
+        valor_ceap = "R$ " + arv.cssselect(css_sel_ceap)[0].text_content()
+    else:
+        valor_ceap = "Ainda não há gasto registrado nesse ano"
 
     css_sel_telefone = ".dl-horizontal > dd:nth-child(10)"
     telefone = arv.cssselect(css_sel_telefone)[0].text_content()

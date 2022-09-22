@@ -60,10 +60,16 @@ def info_deputado(id):
     info = [arv.cssselect(csspath_email)[0].text_content()]
 
     #valor gasto com cota parlamentar
-    info.append(arv.cssselect(csspath_ceap)[0].text_content())
+    if arv.cssselect(csspath_ceap):
+        info.append("R$ " + arv.cssselect(csspath_ceap)[0].text_content())
+    else:
+        info.append("Ainda não há gasto registrado nesse ano")
 
     #valor gasto com verba de gabinete
-    info.append(arv.cssselect(csspath_verba_gab)[0].text_content())
+    if arv.cssselect(csspath_verba_gab):
+        info.append("R$ " + arv.cssselect(csspath_verba_gab)[0].text_content())
+    else:
+        info.append("Ainda não há gasto registrado nesse ano")
     return info
 
 def montar_mensagem(deputado, dados):
@@ -79,8 +85,8 @@ def montar_mensagem(deputado, dados):
     mensagem += f"Email: {info[0]} \n"
     mensagem += f"Telefone: (61) {dados['ultimoStatus']['gabinete']['telefone']} \n\n"
     mensagem += f"Gastos de {deputado['nome']} em {date.today().year} \n"
-    mensagem += f"CEAP: R$ {info[1]} \n"
-    mensagem += f"Verba de Gabinete: R$ {info[2]} \n\n"
+    mensagem += f"CEAP: {info[1]} \n"
+    mensagem += f"Verba de Gabinete: {info[2]} \n\n"
     #mensagem += "Verificar processos envolvendo o parlamentar:\n"
     #mensagem += f"/p_{nome_lower} \n\n"
     mensagem += f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputado['id']} \n"
