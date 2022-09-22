@@ -57,7 +57,12 @@ def info_deputado(id):
     csspath_verba_gab = "#percentualgastoverbagabinete > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)"
     csspath_email = ".email"
 
-    info = [arv.cssselect(csspath_email)[0].text_content()]
+    info = []
+
+    if arv.cssselect(csspath_email):
+        info.append(arv.cssselect(csspath_email)[0].text_content())
+    else:
+        info.append("Email não encontrado")
 
     #valor gasto com cota parlamentar
     if arv.cssselect(csspath_ceap):

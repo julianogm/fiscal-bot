@@ -59,16 +59,21 @@ def info_senador(id):
     arv = lxml.html.fromstring(resposta.text)
 
     css_sel_ceap = "#collapse-ceaps > div:nth-child(1) > table:nth-child(1) > tfoot:nth-child(4) > tr:nth-child(1) > td:nth-child(2)"
-    if arv.cssselect(css_sel_ceap):
-        valor_ceap = "R$ " + arv.cssselect(css_sel_ceap)[0].text_content()
-    else:
-        valor_ceap = "Ainda não há gasto registrado nesse ano"
-
     css_sel_telefone = ".dl-horizontal > dd:nth-child(10)"
-    telefone = arv.cssselect(css_sel_telefone)[0].text_content()
 
-    lista = [valor_ceap, telefone]
-    return lista
+    info = []
+
+    if arv.cssselect(css_sel_ceap):
+        info.append("R$ " + arv.cssselect(css_sel_ceap)[0].text_content())
+    else:
+        info.append("Ainda não há gasto registrado nesse ano")
+
+    if arv.cssselect(css_sel_ceap):
+        info.append(arv.cssselect(css_sel_telefone)[0].text_content())
+    else:
+        info.append("Número não encontrado")
+
+    return info
 
 def montar_mensagem(senador, dados):
     dados_senador = senador['IdentificacaoParlamentar']
@@ -88,7 +93,7 @@ def montar_mensagem(senador, dados):
     mensagem += f"Email: {email} \n"
     mensagem += f"Telefone: {telefone} \n\n"
     mensagem += f"Gastos de {dados_senador['NomeParlamentar']} em {date.today().year} \n"
-    mensagem += f"CEAPS: R$ {gasto_ceap} \n\n"
+    mensagem += f"CEAPS: {gasto_ceap} \n\n"
 
     #mensagem += "Verificar processos envolvendo o parlamentar:\n"
     #mensagem += f"/p_{nome_lower} \n\n"
