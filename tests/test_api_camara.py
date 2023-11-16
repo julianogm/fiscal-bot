@@ -2,6 +2,7 @@ import pytest
 
 from camara import *
 
+
 def test_lista_deputados():
     lista = lista_deputados()
     assert isinstance(lista, list)
@@ -30,10 +31,11 @@ def test_deputado_por_partido():
 
 def test_deputado_por_id():
     dep = deputado_por_id(5)
-    assert dep['nome'] == "Não encontrado"
+    assert dep["nome"] == "Não encontrado"
 
     dep = deputado_por_id(160600)
-    assert "Arthur" in dep['nome']
+    assert "Arthur" in dep["nome"]
+
 
 def test_nomes_deputados():
     lista = nomes_deputados()
