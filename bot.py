@@ -15,9 +15,7 @@ from telegram.ext import (
     Updater,
 )
 
-import camara
-import senado
-from apis import politicos_org
+from apis import camara, politicos_org, senado
 from constant import *
 
 load_dotenv()
@@ -148,8 +146,10 @@ def dep_nome_link(update, context):
     id = id.split("@", 1)[0]
 
     deputado = camara.deputado_por_id(id)
-    update.message.reply_text(deputado["urlFoto"])
-    update.message.reply_text(camara.dados_deputado(deputado))
+    update.message.reply_photo(
+        photo=deputado["urlFoto"], caption=camara.dados_deputado(deputado)
+    )
+    # update.message.reply_text(camara.dados_deputado(deputado))
     # update.message.reply_text(
     #     text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>",
     #     parse_mode=ParseMode.HTML,
@@ -161,8 +161,11 @@ def sen_nome_link(update, context):
     id = id.split("@", 1)[0]
 
     senador = senado.senador_por_id(id)
-    update.message.reply_text(senador["IdentificacaoParlamentar"]["UrlFotoParlamentar"])
-    update.message.reply_text(senado.dados_senador(senador))
+    update.message.reply_photo(
+        photo=senador["IdentificacaoParlamentar"]["UrlFotoParlamentar"],
+        caption=senado.dados_senador(senador),
+    )
+    # update.message.reply_text(senado.dados_senador(senador))
     # update.message.reply_text(
     #     text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>",
     #     parse_mode=ParseMode.HTML,

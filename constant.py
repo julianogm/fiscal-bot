@@ -88,10 +88,12 @@ UF_NOME = [
 ]
 
 API_CAMARA = "https://dadosabertos.camara.leg.br/api/v2/"
+SITE_CAMARA = "https://www.camara.leg.br/deputados/"
 
 LEGISLATURA = API_CAMARA + "legislaturas?itens=1&ordem=DESC&ordenarPor=id"
 
 API_SENADO = "https://legis.senado.leg.br/dadosabertos/"
+SITE_SENADO = "https://www6g.senado.leg.br/transparencia/sen/"
 
 
 NORMALIZAR = str.maketrans(
