@@ -3,8 +3,9 @@ import sys
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
+grandparent = os.path.dirname(parent)
 sys.path.append(parent)
-
+sys.path.append(grandparent)
 from datetime import date
 
 import lxml.html
@@ -35,16 +36,16 @@ class Deputies:
         deputies = self._get_data(url)
         return deputies
 
-    def by_filter(self, filter_name, filter_value):
+    def _by_filter(self, filter_name, filter_value):
         url = f"{API_CAMARA}deputados?{filter_name}={filter_value}"
         deputies = self._get_data(url)
         return deputies
 
     def by_state(self, state_acronym):
-        return self.by_filter("siglaUf", state_acronym)
+        return self._by_filter("siglaUf", state_acronym)
 
     def by_political_party(self, party_acronym):
-        return self.by_filter("siglaPartido", party_acronym)
+        return self._by_filter("siglaPartido", party_acronym)
 
     def by_name(self, name):
         legislature_data = self._get_data(LEGISLATURA)
@@ -65,7 +66,7 @@ class Deputies:
         if deputies == None:
             deputies = self.list_deputies()
         name_ids = "\n".join(
-            [f"{deputy['nome']} - /dep_{deputy['id']}" for deputy in deputies]
+            [f"{deputy['nome']} - /deputado_{deputy['id']}" for deputy in deputies]
         )
         return name_ids
 
@@ -73,7 +74,7 @@ class Deputies:
         deputy_data = self._message(deputy_id)
         return deputy_data
 
-    # Method responsible for fetch data from chamber of deputies website via webscraping
+    # fetch data from chamber of deputies website via webscraping
     def _deputy_info(self, deputy_id):
         response = requests.get(f"{SITE_CAMARA}{deputy_id}")
         tree = lxml.html.fromstring(response.text)
@@ -102,7 +103,7 @@ class Deputies:
 
         return site_info
 
-    # Method responsible for build the response message to the user
+    # build the response message to the user
     def _message(self, deputy_id):
         current_year = date.today().year
         url = f"{API_CAMARA}deputados/{deputy_id}"
@@ -126,7 +127,9 @@ class Deputies:
             f"Verba de Gabinete: R$ {deputy_site_data['verba_gabinete']}\n\n"
             f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputy_id}\n"
             f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={name_search_jusbrasil})\n\n"
-            f"{deputy_api_data['urlFoto']}"
         )
 
-        return message
+        data_dict = {}
+        data_dict["message"] = message
+        data_dict["photo"] = deputy_api_data["urlFoto"]
+        return data_dict

@@ -2,7 +2,6 @@
 
 import logging
 import os
-from contextlib import nullcontext
 
 from dotenv import load_dotenv
 from telegram import ParseMode
@@ -15,8 +14,10 @@ from telegram.ext import (
     Updater,
 )
 
-from apis import camara, politicos_org, senado
 from constant import *
+from modules.apis.camara import *
+from modules.apis.politicos_org import *
+from modules.apis.senado import *
 
 load_dotenv()
 
@@ -50,15 +51,11 @@ def ajuda(update, context):
 
 
 def deputados(update, context: CallbackContext):
-    update.message.reply_text(
-        "Escolha um filtro:", reply_markup=camara.botoes_deputados()
-    )
+    update.message.reply_text("Escolha um filtro:", reply_markup=botoes_deputados())
 
 
 def senadores(update, context: CallbackContext):
-    update.message.reply_text(
-        "Escolha um filtro:", reply_markup=senado.botoes_senadores()
-    )
+    update.message.reply_text("Escolha um filtro:", reply_markup=botoes_senadores())
 
 
 def parlamento(update, context):
@@ -89,50 +86,48 @@ def callback(update, context):
         if condicao == "partido":
             query.edit_message_text(
                 text="Escolha um partido:",
-                reply_markup=camara.botoes_partidos_deputados(),
+                reply_markup=botoes_partidos_deputados(),
             )
         if condicao == "estado":
             query.edit_message_text(
                 text="Escolha um estado:",
-                reply_markup=camara.botoes_estados_deputados(),
+                reply_markup=botoes_estados_deputados(),
             )
         if condicao == "voltar":
             query.edit_message_text(
-                "Escolha um filtro:", reply_markup=camara.botoes_deputados()
+                "Escolha um filtro:", reply_markup=botoes_deputados()
             )
         if condicao in UF_SIGLAS:
             query.edit_message_text(
                 f"Deputados em exercício - {condicao}:\n"
-                + camara.nomes_deputados(camara.deputado_por_estado(condicao))
+                + nomes_deputados(deputado_por_estado(condicao))
             )
-        if condicao in camara.lista_partidos_deputados():
-            query.edit_message_text(
-                camara.nomes_deputados(camara.deputado_por_partido(condicao))
-            )
+        if condicao in lista_partidos_deputados():
+            query.edit_message_text(nomes_deputados(deputado_por_partido(condicao)))
     elif chamada == "sen":
         if condicao == "partido":
             query.edit_message_text(
                 text="Escolha um partido:",
-                reply_markup=senado.botoes_partidos_senadores(),
+                reply_markup=botoes_partidos_senadores(),
             )
         if condicao == "estado":
             query.edit_message_text(
                 text="Escolha um estado:",
-                reply_markup=senado.botoes_estados_senadores(),
+                reply_markup=botoes_estados_senadores(),
             )
         if condicao == "voltar":
             query.edit_message_text(
-                "Escolha um filtro:", reply_markup=senado.botoes_senadores()
+                "Escolha um filtro:", reply_markup=botoes_senadores()
             )
         if condicao in UF_SIGLAS:
             query.edit_message_text(
                 f"Senadores em exercício - {condicao}:\n"
-                + senado.nomes_senadores(senado.senador_por_estado(condicao))
+                + nomes_senadores(senador_por_estado(condicao))
             )
-        if condicao in senado.lista_partidos_senadores():
+        if condicao in lista_partidos_senadores():
             query.edit_message_text(
                 f"Senadores eleitos pelo partido {condicao}:\n"
-                + senado.nomes_senadores(senado.senador_por_partido(condicao))
+                + nomes_senadores(senador_por_partido(condicao))
             )
 
 
@@ -145,9 +140,9 @@ def dep_nome_link(update, context):
     id = update.message.text.replace("/dep_", "")
     id = id.split("@", 1)[0]
 
-    deputado = camara.deputado_por_id(id)
+    deputado = deputado_por_id(id)
     update.message.reply_photo(
-        photo=deputado["urlFoto"], caption=camara.dados_deputado(deputado)
+        photo=deputado["urlFoto"], caption=dados_deputado(deputado)
     )
     # update.message.reply_text(camara.dados_deputado(deputado))
     # update.message.reply_text(
@@ -160,10 +155,10 @@ def sen_nome_link(update, context):
     id = update.message.text.replace("/sen_", "")
     id = id.split("@", 1)[0]
 
-    senador = senado.senador_por_id(id)
+    senador = senador_por_id(id)
     update.message.reply_photo(
         photo=senador["IdentificacaoParlamentar"]["UrlFotoParlamentar"],
-        caption=senado.dados_senador(senador),
+        caption=dados_senador(senador),
     )
     # update.message.reply_text(senado.dados_senador(senador))
     # update.message.reply_text(
@@ -176,7 +171,7 @@ def p(update, context):
     nome = update.message.text.replace("/p_", "").lower()
     nome = nome.split("@", 1)[0]
 
-    processos = politicos_org.get_processos(nome)
+    processos = get_processos(nome)
 
     if processos == False:
         update.message.reply_text(
@@ -200,15 +195,15 @@ def pesquisa_nome(update, context):
         update.message.reply_text("Nome muito curto")
         return
 
-    lista_deputados = camara.deputado_por_nome(nome)
-    lista_senadores = senado.senador_por_nome(nome)
+    lista_deputados = deputado_por_nome(nome)
+    lista_senadores = senador_por_nome(nome)
 
     if len(lista_senadores) == 0 and len(lista_deputados) == 0:
         update.message.reply_text("Nome não encontrado")
         return
     elif len(lista_deputados) == 1 and len(lista_senadores) == 0:
         update.message.reply_text(lista_deputados[0]["urlFoto"])
-        update.message.reply_text(camara.dados_deputado(lista_deputados[0]))
+        update.message.reply_text(dados_deputado(lista_deputados[0]))
         # update.message.reply_text(
         #     text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>",
         #     parse_mode=ParseMode.HTML,
@@ -217,7 +212,7 @@ def pesquisa_nome(update, context):
         update.message.reply_text(
             lista_senadores[0]["IdentificacaoParlamentar"]["UrlFotoParlamentar"]
         )
-        update.message.reply_text(senado.dados_senador(lista_senadores[0]))
+        update.message.reply_text(dados_senador(lista_senadores[0]))
         # update.message.reply_text(
         #     text="<a href='https://t.me/avaliacao_fiscal_bot/4'>Clique aqui para avaliar sua experiência em 30 segundos e ajudar na minha pesquisa</a>",
         #     parse_mode=ParseMode.HTML,
@@ -225,11 +220,11 @@ def pesquisa_nome(update, context):
     else:
         if len(lista_senadores) > 0:
             update.message.reply_text(
-                "Senadores encontrados:\n" + senado.nomes_senadores(lista_senadores)
+                "Senadores encontrados:\n" + nomes_senadores(lista_senadores)
             )
         if len(lista_deputados) > 0:
             update.message.reply_text(
-                "Deputados encontrados:\n" + camara.nomes_deputados(lista_deputados)
+                "Deputados encontrados:\n" + nomes_deputados(lista_deputados)
             )
 
 

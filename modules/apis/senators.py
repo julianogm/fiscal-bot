@@ -66,17 +66,22 @@ class Senators:
         ]
         return political_parties
 
-    def by_id(self, senator_id):
-        url = f"{API_SENADO}senador/{senator_id}"
-        senator = self._get_data(url)["DetalheParlamentar"]["Parlamentar"]
-
-        return senator
+    def get_names_ids(self, senators=None):
+        if senators == None:
+            senators = self.list_senators()
+        name_ids = "\n".join(
+            [
+                f"{senator['IdentificacaoParlamentar']['NomeParlamentar']} - /senator_{senator['IdentificacaoParlamentar']['CodigoParlamentar']}"
+                for senator in senators
+            ]
+        )
+        return name_ids
 
     def get_senator_data(self, senator_id):
-        senator_data = self._message(senator_id)
+        senator_data = self._reply_data(senator_id)
         return senator_data
 
-    # Method responsible for fetch data from federal senate website via webscraping
+    # fetch data from federal senate website via webscraping
     def _senator_info(self, senator_id):
         current_year = date.today().year
         url = f"{SITE_SENADO}{senator_id}?ano={current_year}"
@@ -99,7 +104,8 @@ class Senators:
 
         return site_info
 
-    def _message(self, senator_id):
+    # build the response message to the user
+    def _reply_data(self, senator_id):
         current_year = date.today().year
         url = f"{API_SENADO}senador/{senator_id}"
         senator = self._get_data(url)["DetalheParlamentar"]["Parlamentar"]
@@ -127,7 +133,9 @@ class Senators:
             f"CEAPS: {senator_site_data['ceap']}\n\n"
             f"Mais sobre o senador(a): {senator_api_data['UrlPaginaParlamentar']}\n"
             f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={name_search_jusbrasil}\n"
-            f"{senator_api_data['UrlFotoParlamentar']}"
         )
 
-        return message
+        data_dict = {}
+        data_dict["message"] = message
+        data_dict["photo"] = senator_api_data["UrlFotoParlamentar"]
+        return data_dict
