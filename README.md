@@ -10,12 +10,14 @@ _______________
 
 python 3.10.12
 
-cssselect 1.1.0 \
-lxml 4.9.1 \
-python-dotenv 0.20.0 \
+cssselect 1.2.0 \
+lxml 4.9.3 \
+python-dotenv 1.0.0 \
 python_telegram_bot 13.14 \
-requests 2.25.1 \
-telegram 0.0.1
+requests 2.31.0 \
+telegram 0.0.1  \
+pytest 7.4.3 \
+coverage 7.3.2
 
 \
 Para instalar os pacotes necessários, rode o comando no terminal:
