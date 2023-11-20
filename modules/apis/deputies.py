@@ -118,7 +118,7 @@ class Deputies:
             f"CEAP: {deputy_site_data['ceap']}\n"
             f"Verba de Gabinete: {deputy_site_data['verba_gabinete']}\n\n"
             f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputy_id}\n"
-            f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={name_search_jusbrasil})\n\n"
+            f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={name_search_jusbrasil}\n\n"
         )
 
         data_dict = {}
