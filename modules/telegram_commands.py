@@ -1,5 +1,4 @@
 import logging
-import re
 
 from telegram.ext import CallbackContext
 
@@ -156,3 +155,48 @@ def create_senator_link(update, context):
         photo=senator_data["photo"],
         caption=senator_data["message"],
     )
+
+
+def search_name(update, context):
+    parliamentarian_name = update.message.text
+
+    if len(parliamentarian_name) < 4:
+        message = "Nome muito curto. Tente novamente com um nome maior."
+        update.message.reply_text(message)
+        return
+
+    deputies_list = obj_deputy.by_name(parliamentarian_name)
+    senators_list = obj_senator.by_name(parliamentarian_name)
+
+    if len(senators_list) == 0 and len(deputies_list) == 0:
+        message = "Não foi encontrado parlamentar com o nome inserido."
+        update.message.reply_text(message)
+        return
+
+    elif len(senators_list) == 0 and len(deputies_list) == 1:
+        deputy_data = obj_deputy.get_deputy_data(deputies_list[0])
+        update.message.reply_photo(
+            photo=deputy_data["photo"], caption=deputy_data["message"]
+        )
+
+    elif len(senators_list) == 1 and len(deputies_list) == 0:
+        senator_data = obj_senator.get_senator_data(senators_list[0])
+        update.message.reply_photo(
+            photo=senator_data["photo"],
+            caption=senator_data["message"],
+        )
+
+    else:
+        senators_names_ids = obj_senator.get_names_ids(senators_list)
+        deputies_names_ids = obj_deputy.get_names_ids(deputies_list)
+
+        message_senators = f"Senadores encontrados:\n{senators_names_ids}"
+        message_deputies = f"Deputados encontrados:\n{deputies_names_ids}"
+        message = ""
+
+        if len(senators_names_ids) > 0:
+            message = f"{message}{message_senators}\n\n"
+        if len(deputies_names_ids) > 0:
+            message = f"{message}{message_deputies}"
+
+        update.message.reply_text(message)

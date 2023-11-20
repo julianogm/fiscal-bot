@@ -1,12 +1,3 @@
-import os
-import sys
-
-current = os.path.dirname(os.path.realpath(__file__))
-parent = os.path.dirname(current)
-grandparent = os.path.dirname(parent)
-sys.path.append(parent)
-sys.path.append(grandparent)
-
 from datetime import date
 
 import lxml.html
@@ -79,6 +70,19 @@ class Senators:
             ]
         )
         return name_ids
+
+    def by_name(self, name):
+        senators_list = obj_senator.list_senators()
+        nomalized_name = name.lower().translate(NORMALIZAR)
+        senators_found = [
+            senator
+            for senator in senators_list
+            if nomalized_name
+            in senator["IdentificacaoParlamentar"]["NomeParlamentar"]
+            .lower()
+            .translate(NORMALIZAR)
+        ]
+        return senators_found
 
     def get_senator_data(self, senator_id):
         senator_data = self._reply_data(senator_id)

@@ -1,5 +1,4 @@
 import os
-from contextlib import nullcontext
 
 from dotenv import load_dotenv
 from telegram import ParseMode
@@ -11,11 +10,12 @@ from telegram.ext import (
     Updater,
 )
 
+from config import set_path
 from constant import *
-from modules import *
 from modules.telegram_commands import *
 
 load_dotenv()
+set_path()
 
 MODE = os.environ["MODE"]
 TOKEN = os.environ["TOKEN"]
@@ -47,9 +47,10 @@ def main():
             create_senator_link,
         )
     )
+    dp.add_handler(MessageHandler(Filters.command, help_command))
+    dp.add_handler(MessageHandler(Filters.text, search_name))
 
     # Start the Bot
-    print("Starting up")
     if MODE == "webhook":
         updater.start_webhook(
             listen="0.0.0.0",

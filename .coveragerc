@@ -1,0 +1,13 @@
+[run]
+source = 
+    ./
+    modules/
+
+
+[report]
+exclude_lines =
+
+omit =
+    tests/*
+    constant.py
+    config.py
