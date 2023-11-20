@@ -3,7 +3,9 @@ import sys
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
+grandparent = os.path.dirname(parent)
 sys.path.append(parent)
+sys.path.append(grandparent)
 
 from datetime import date
 
@@ -64,14 +66,15 @@ class Senators:
             senator["IdentificacaoParlamentar"]["SiglaPartidoParlamentar"]
             for senator in senators
         ]
-        return political_parties
+
+        return list(set(political_parties))
 
     def get_names_ids(self, senators=None):
         if senators == None:
             senators = self.list_senators()
         name_ids = "\n".join(
             [
-                f"{senator['IdentificacaoParlamentar']['NomeParlamentar']} - /senator_{senator['IdentificacaoParlamentar']['CodigoParlamentar']}"
+                f"{senator['IdentificacaoParlamentar']['NomeParlamentar']} - /senador_{senator['IdentificacaoParlamentar']['CodigoParlamentar']}"
                 for senator in senators
             ]
         )
@@ -92,7 +95,7 @@ class Senators:
 
         if tree.cssselect(CSS_CEAP):
             ceap_spending = tree.cssselect(CSS_CEAP)[0].text_content()
-            site_info["ceap"] = ceap_spending
+            site_info["ceap"] = f"R$ {ceap_spending}"
         else:
             site_info["ceap"] = "Ainda não há gasto registrado nesse ano"
 
@@ -139,3 +142,6 @@ class Senators:
         data_dict["message"] = message
         data_dict["photo"] = senator_api_data["UrlFotoParlamentar"]
         return data_dict
+
+
+obj_senator = Senators()

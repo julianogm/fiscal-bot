@@ -89,13 +89,13 @@ class Deputies:
 
         if tree.cssselect(CSS_CEAP):
             ceap_spending = tree.cssselect(CSS_CEAP)[0].text_content()
-            site_info["ceap"] = ceap_spending
+            site_info["ceap"] = f"R$ {ceap_spending}"
         else:
             site_info["ceap"] = "Ainda não há gasto registrado com CEAP nesse ano"
 
         if tree.cssselect(CSS_VERBA_GAB):
             verba_gabinete_spending = tree.cssselect(CSS_VERBA_GAB)[0].text_content()
-            site_info["verba_gabinete"] = verba_gabinete_spending
+            site_info["verba_gabinete"] = f"R$ {verba_gabinete_spending}"
         else:
             site_info[
                 "verba_gabinete"
@@ -123,8 +123,8 @@ class Deputies:
             f"Email: {deputy_site_data['email']}\n"
             f"Telefone: (61) {deputy_api_data['gabinete']['telefone']}\n\n"
             f"Gastos de {deputy_api_data['nome']} em {current_year}\n"
-            f"CEAP: R$ {deputy_site_data['ceap']}\n"
-            f"Verba de Gabinete: R$ {deputy_site_data['verba_gabinete']}\n\n"
+            f"CEAP: {deputy_site_data['ceap']}\n"
+            f"Verba de Gabinete: {deputy_site_data['verba_gabinete']}\n\n"
             f"Mais sobre o deputado(a): https://www.camara.leg.br/deputados/{deputy_id}\n"
             f"https://www.jusbrasil.com.br/artigos-noticias/busca?q={name_search_jusbrasil})\n\n"
         )
@@ -133,3 +133,6 @@ class Deputies:
         data_dict["message"] = message
         data_dict["photo"] = deputy_api_data["urlFoto"]
         return data_dict
+
+
+obj_deputy = Deputies()

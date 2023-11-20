@@ -9,11 +9,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from constant import *
 
-from .apis.deputies import Deputies
-from .apis.senators import Senators
-
-deputy = Deputies()
-senator = Senators()
+from .apis.deputies import obj_deputy
+from .apis.senators import obj_senator
 
 
 def state_buttons(type):
@@ -33,7 +30,7 @@ def state_buttons(type):
 
 
 def deputies_parties_buttons():
-    parties = deputy.list_political_parties()
+    parties = obj_deputy.list_political_parties()
     parties.sort()
     buttons_per_row = 2
     keyboard = []
@@ -56,7 +53,7 @@ def deputies_parties_buttons():
 
 
 def senators_parties_buttons():
-    parties = senator.list_political_parties()
+    parties = obj_senator.list_political_parties()
     parties.sort()
     buttons_per_row = 2
     keyboard = []
@@ -70,11 +67,7 @@ def senators_parties_buttons():
         ]
         keyboard.append(row)
 
-    if len(parties) % buttons_per_row == 0:
-        keyboard.append(back_button)
-    else:
-        keyboard[-1].append(back_button)
-
+    keyboard.append(back_button)
     return InlineKeyboardMarkup(keyboard)
 
 

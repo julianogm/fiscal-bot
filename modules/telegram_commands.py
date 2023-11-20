@@ -1,11 +1,9 @@
 import logging
+import re
 
 from telegram.ext import CallbackContext
 
 from .telegram_buttons import *
-
-deputies = Deputies()
-senators = Senators()
 
 # Enable logs
 logging.basicConfig(
@@ -68,8 +66,9 @@ def about_command(update, context):
 def callback(update, context):
     query = update.callback_query
 
-    political_type = query.data[:8]
-    request_type = query.data[9:]
+    data = query.data.split("_")
+    political_type = data[0]
+    request_type = data[1]
 
     if political_type == "deputado":
         if request_type == "partido":
@@ -78,30 +77,30 @@ def callback(update, context):
                 reply_markup=deputies_parties_buttons(),
             )
 
-        if request_type == "estado":
+        elif request_type == "estado":
             query.edit_message_text(
                 text="Escolha um estado:",
                 reply_markup=state_buttons(political_type),
             )
 
-        if request_type == "voltar":
+        elif request_type == "voltar":
             query.edit_message_text(
                 "Escolha um filtro:", reply_markup=deputies_buttons()
             )
 
-        if request_type in UF_SIGLAS:
-            deputies_list = deputies.by_state(request_type)
+        elif request_type in UF_SIGLAS:
+            deputies_list = obj_deputy.by_state(request_type)
             message = (
                 f"Deputados em exercício - {request_type}:\n"
-                f"{deputies.get_names_ids(deputies_list)}"
+                f"{obj_deputy.get_names_ids(deputies_list)}"
             )
             query.edit_message_text(message)
 
-        if request_type in deputies.list_political_parties():
-            deputies_list = deputies.by_political_party(request_type)
+        elif request_type in obj_deputy.list_political_parties():
+            deputies_list = obj_deputy.by_political_party(request_type)
             message = (
                 f"Deputados eleitos pelo partido {request_type}:\n"
-                f"{deputies.get_names_ids(deputies_list)}"
+                f"{obj_deputy.get_names_ids(deputies_list)}"
             )
             query.edit_message_text(message)
 
@@ -112,30 +111,30 @@ def callback(update, context):
                 reply_markup=senators_parties_buttons(),
             )
 
-        if request_type == "estado":
+        elif request_type == "estado":
             query.edit_message_text(
                 text="Escolha um estado:",
                 reply_markup=state_buttons(political_type),
             )
 
-        if request_type == "voltar":
+        elif request_type == "voltar":
             query.edit_message_text(
                 "Escolha um filtro:", reply_markup=senators_buttons()
             )
 
-        if request_type in UF_SIGLAS:
-            senators_list = senators.by_state(request_type)
+        elif request_type in UF_SIGLAS:
+            senators_list = obj_senator.by_state(request_type)
             message = (
                 f"Senadores em exercício - {request_type}:\n"
-                f"{senator.get_names_ids(senators_list)}"
+                f"{obj_senator.get_names_ids(senators_list)}"
             )
             query.edit_message_text(message)
 
-        if request_type in senators.list_political_parties():
-            senators_list = senators.by_political_party(request_type)
+        elif request_type in obj_senator.list_political_parties():
+            senators_list = obj_senator.by_political_party(request_type)
             message = (
                 f"Senadores eleitos pelo partido {request_type}:\n"
-                f"{senators.get_names_ids(senators_list)}"
+                f"{obj_senator.get_names_ids(senators_list)}"
             )
             query.edit_message_text(message)
 
@@ -143,7 +142,7 @@ def callback(update, context):
 def create_deputy_link(update, context):
     deputy_id = update.message.text.replace("/deputado_", "")
 
-    deputy_data = deputy.get_deputy_data(deputy_id)
+    deputy_data = obj_deputy.get_deputy_data(deputy_id)
     update.message.reply_photo(
         photo=deputy_data["photo"], caption=deputy_data["message"]
     )
@@ -152,7 +151,7 @@ def create_deputy_link(update, context):
 def create_senator_link(update, context):
     senator_id = update.message.text.replace("/senador_", "")
 
-    senator_data = senators.get_senator_data(senator_id)
+    senator_data = obj_senator.get_senator_data(senator_id)
     update.message.reply_photo(
         photo=senator_data["photo"],
         caption=senator_data["message"],

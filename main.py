@@ -13,8 +13,6 @@ from telegram.ext import (
 
 from constant import *
 from modules import *
-from modules.apis.camara import *
-from modules.apis.senado import *
 from modules.telegram_commands import *
 
 load_dotenv()
@@ -51,6 +49,7 @@ def main():
     )
 
     # Start the Bot
+    print("Starting up")
     if MODE == "webhook":
         updater.start_webhook(
             listen="0.0.0.0",
