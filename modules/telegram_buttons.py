@@ -28,7 +28,7 @@ def deputies_parties_buttons():
     buttons_per_row = 2
     keyboard = []
 
-    back_button = [InlineKeyboardButton("<< Voltar", callback_data="deputado_voltar")]
+    back_button = InlineKeyboardButton("<< Voltar", callback_data="deputado_voltar")
 
     for party_tuple in zip(*[iter(parties)] * buttons_per_row):
         row = [
@@ -38,9 +38,9 @@ def deputies_parties_buttons():
         keyboard.append(row)
 
     if len(parties) % buttons_per_row == 0:
-        keyboard.append(back_button)
-    else:
         keyboard[-1].append(back_button)
+    else:
+        keyboard.append([back_button])
 
     return InlineKeyboardMarkup(keyboard)
 

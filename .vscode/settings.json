@@ -1,13 +1,13 @@
 {
-    "[python]": {
-      "editor.defaultFormatter": "ms-python.black-formatter",
-      "editor.formatOnSave": true,
-      "editor.codeActionsOnSave": {
-        "source.organizeImports": true
-      }
-    },
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "python.formatting.provider": "black",
-    "isort.args": ["--profile", "black"]
-  }
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "python.formatting.provider": "black",
+  "isort.args": ["--profile", "black"]
+}

@@ -89,9 +89,9 @@ class Deputies:
             verba_gabinete_spending = tree.cssselect(CSS_VERBA_GAB)[0].text_content()
             site_info["verba_gabinete"] = f"R$ {verba_gabinete_spending}"
         else:
-            site_info[
-                "verba_gabinete"
-            ] = "Ainda não há gasto registrado com Verba de Gabinete nesse ano"
+            site_info["verba_gabinete"] = (
+                "Ainda não há gasto registrado com Verba de Gabinete nesse ano"
+            )
 
         return site_info
 

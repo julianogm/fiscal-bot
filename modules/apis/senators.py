@@ -73,11 +73,11 @@ class Senators:
 
     def by_name(self, name):
         senators_list = obj_senator.list_senators()
-        nomalized_name = name.lower().translate(NORMALIZAR)
+        normalized_name = name.lower().translate(NORMALIZAR)
         senators_found = [
             senator
             for senator in senators_list
-            if nomalized_name
+            if normalized_name
             in senator["IdentificacaoParlamentar"]["NomeParlamentar"]
             .lower()
             .translate(NORMALIZAR)

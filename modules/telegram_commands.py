@@ -45,20 +45,22 @@ def parliament_command(update, context):
     message = (
         "O parlamento brasileiro é o Congresso Nacional, constituído pela Câmara dos Deputados e pelo Senado Federal.\n"
         "O Congresso Nacional é o órgão constitucional que exerce, no âmbito federal, as funções do poder legislativo, quais sejam, elaborar/aprovar leis e fiscalizar o Estado brasileiro (suas duas funções típicas), bem como administrar e julgar (funções atípicas).\n\n"
-        "Gastos do Senado Federal e da Câmara do Deputados:\n"
-        "https://www12.senado.leg.br/transparencia \n"
-        "http://tiny.cc/gastos_parlamentares\n\n"
-        "Sobre a CEAP (Cota para o Exercício da Atividade Parlamentar): \nhttp://tiny.cc/ceap \nhttp://tiny.cc/ceaps"
+        "Mais detalhes sobre os gastos do parlamento brasileiro: \n"
+        "[Câmara dos Deputados](https://www.camara.leg.br/transparencia/) \n"
+        "[Senado Federal](https://www12.senado.leg.br/transparencia) \n"
+        "\n"
+        "Sobre a CEAP (Cota para o Exercício da Atividade Parlamentar): \n"
+        "[Câmara dos Deputados](https://www2.camara.leg.br/comunicacao/assessoria-de-imprensa/guia-para-jornalistas/cota-parlamentar)\n"
+        "[Senado Federal](https://www12.senado.leg.br/perguntas-frequentes/perguntas-frequentes/canais-de-atendimento/senadores/o-que-pode-ser-ressarcido-a-conta-da-ceaps)"
     )
 
-    update.message.reply_text(message, disable_web_page_preview=True)
+    update.message.reply_text(
+        message, disable_web_page_preview=True, parse_mode="Markdown"
+    )
 
 
 def about_command(update, context):
-    message = (
-        "Código fonte (ainda em desenvolvimento): \n"
-        "https://github.com/julianogm/fiscal-bot \n\n"
-    )
+    message = "Código fonte: https://github.com/julianogm/fiscal-bot \n\n"
     update.message.reply_text(message, disable_web_page_preview=True)
 
 
@@ -165,6 +167,11 @@ def search_name(update, context):
         update.message.reply_text(message)
         return
 
+    # if " " in parliamentarian_name:
+    #     message = "Insira um nome sem espaços em branco."
+    #     update.message.reply_text(message)
+    #     return
+
     deputies_list = obj_deputy.by_name(parliamentarian_name)
     senators_list = obj_senator.by_name(parliamentarian_name)
 
@@ -174,13 +181,15 @@ def search_name(update, context):
         return
 
     elif len(senators_list) == 0 and len(deputies_list) == 1:
-        deputy_data = obj_deputy.get_deputy_data(deputies_list[0])
+        deputy_data = obj_deputy.get_deputy_data(deputies_list[0]["id"])
         update.message.reply_photo(
             photo=deputy_data["photo"], caption=deputy_data["message"]
         )
 
     elif len(senators_list) == 1 and len(deputies_list) == 0:
-        senator_data = obj_senator.get_senator_data(senators_list[0])
+        senator_data = obj_senator.get_senator_data(
+            senators_list[0]["IdentificacaoParlamentar"]["CodigoParlamentar"]
+        )
         update.message.reply_photo(
             photo=senator_data["photo"],
             caption=senator_data["message"],
