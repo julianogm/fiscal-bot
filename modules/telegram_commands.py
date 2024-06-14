@@ -167,10 +167,10 @@ def search_name(update, context):
         update.message.reply_text(message)
         return
 
-    # if " " in parliamentarian_name:
-    #     message = "Insira um nome sem espaços em branco."
-    #     update.message.reply_text(message)
-    #     return
+    if " " in parliamentarian_name:
+        message = "Insira um nome sem espaços em branco."
+        update.message.reply_text(message)
+        return
 
     deputies_list = obj_deputy.by_name(parliamentarian_name)
     senators_list = obj_senator.by_name(parliamentarian_name)
